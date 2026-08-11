@@ -1,0 +1,6 @@
+{
+  "name": "concret.xyz — Digital Archive",
+  "description": "Digital Archive for concret.xyz memes featuring intro video stream and curated meme collection.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

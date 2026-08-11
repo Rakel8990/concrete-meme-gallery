@@ -1,0 +1,164 @@
+import React, { useState, useEffect } from 'react';
+import { IntroPage } from './components/IntroPage';
+import { GalleryPage } from './components/GalleryPage';
+import { MemeLightbox } from './components/MemeLightbox';
+import { PdfExtractorModal } from './components/PdfExtractorModal';
+import { INITIAL_MEMES } from './data/initialMemes';
+import { Meme, MemeCategory } from './types';
+import { saveItem, getItem } from './utils/storage';
+
+const STORAGE_KEY = 'concrete_xyz_meme_gallery_v6';
+const VIDEO_STORAGE_KEY = 'concrete_xyz_intro_video';
+
+export default function App() {
+  const [activePage, setActivePage] = useState<'intro' | 'gallery'>('intro');
+  
+  // Memes state with initial PDF concrete.xyz memes & new additions
+  const [memes, setMemes] = useState<Meme[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed: Meme[] = JSON.parse(saved);
+        const existingIds = new Set(parsed.map((m) => m.id));
+        const missing = INITIAL_MEMES.filter((m) => !existingIds.has(m.id));
+        if (missing.length > 0) {
+          return [...missing, ...parsed];
+        }
+        return parsed;
+      }
+    } catch (e) {
+      console.warn('LocalStorage read skipped:', e);
+    }
+    return INITIAL_MEMES;
+  });
+
+  // Async load from IndexedDB on initial mount if available
+  useEffect(() => {
+    getItem<Meme[]>(STORAGE_KEY).then((saved) => {
+      if (saved && Array.isArray(saved) && saved.length > 0) {
+        const existingIds = new Set(saved.map((m) => m.id));
+        const missing = INITIAL_MEMES.filter((m) => !existingIds.has(m.id));
+        if (missing.length > 0) {
+          setMemes([...missing, ...saved]);
+        } else {
+          setMemes(saved);
+        }
+      }
+    });
+  }, []);
+
+  // Intro Video URL state
+  const [videoUrl, setVideoUrl] = useState<string>(() => {
+    try {
+      return localStorage.getItem(VIDEO_STORAGE_KEY) || 'https://files.catbox.moe/fmrpp0.mp4';
+    } catch {
+      return 'https://files.catbox.moe/fmrpp0.mp4';
+    }
+  });
+
+  useEffect(() => {
+    getItem<string>(VIDEO_STORAGE_KEY).then((saved) => {
+      if (saved) {
+        setVideoUrl(saved);
+      }
+    });
+  }, []);
+
+  // Lightbox & Modal States
+  const [selectedMeme, setSelectedMeme] = useState<Meme | null>(null);
+  const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
+
+  // Persist memes to storage without quota crash
+  useEffect(() => {
+    saveItem(STORAGE_KEY, memes);
+  }, [memes]);
+
+  // Persist video URL
+  const handleUploadVideo = (url: string) => {
+    setVideoUrl(url);
+    saveItem(VIDEO_STORAGE_KEY, url);
+  };
+
+  // Actions
+  const handleLike = (id: string) => {
+    setMemes((prev) =>
+      prev.map((m) => (m.id === id ? { ...m, likes: m.likes + 1 } : m))
+    );
+    if (selectedMeme && selectedMeme.id === id) {
+      setSelectedMeme((prev) => (prev ? { ...prev, likes: prev.likes + 1 } : null));
+    }
+  };
+
+  const handleCategoryChange = (id: string, newCategory: MemeCategory) => {
+    setMemes((prev) =>
+      prev.map((m) => (m.id === id ? { ...m, category: newCategory } : m))
+    );
+    if (selectedMeme && selectedMeme.id === id) {
+      setSelectedMeme((prev) => (prev ? { ...prev, category: newCategory } : null));
+    }
+  };
+
+  const handleUpdateMemeText = (id: string, topText: string, bottomText: string) => {
+    setMemes((prev) =>
+      prev.map((m) => (m.id === id ? { ...m, topText, bottomText } : m))
+    );
+  };
+
+  const handleImportPdfMemes = (newMemes: Meme[]) => {
+    setMemes((prev) => [...newMemes, ...prev]);
+  };
+
+  const handleAddMeme = (memeData: Partial<Meme>) => {
+    const newMeme: Meme = {
+      id: `meme-${Date.now()}`,
+      number: memeData.number || `${memes.length + 1}`,
+      title: memeData.title || 'Untitled Concrete Meme',
+      imageUrl: memeData.imageUrl || '',
+      category: memeData.category || 'premium',
+      tags: memeData.tags || ['Concrete'],
+      topText: memeData.topText || '',
+      bottomText: memeData.bottomText || '',
+      description: memeData.description || '',
+      likes: 0,
+      createdAt: new Date().toISOString().split('T')[0],
+    };
+    setMemes((prev) => [newMeme, ...prev]);
+  };
+
+  return (
+    <div className="min-h-screen bg-[#080a0f] text-[#f7f4ec] font-sans">
+      {activePage === 'intro' ? (
+        <IntroPage
+          onEnterGallery={() => setActivePage('gallery')}
+          videoUrl={videoUrl}
+          onUploadVideo={handleUploadVideo}
+        />
+      ) : (
+        <GalleryPage
+          memes={memes}
+          onBackToIntro={() => setActivePage('intro')}
+          onSelectMeme={(m) => setSelectedMeme(m)}
+        />
+      )}
+
+      {/* Lightbox for viewing high-res meme */}
+      <MemeLightbox
+        meme={selectedMeme}
+        onClose={() => setSelectedMeme(null)}
+        onEdit={(m) => {
+          // Open edit options
+        }}
+        onLike={handleLike}
+        onCategoryChange={handleCategoryChange}
+        onUpdateMemeText={handleUpdateMemeText}
+      />
+
+      {/* PDF Extraction Modal */}
+      <PdfExtractorModal
+        isOpen={isPdfModalOpen}
+        onClose={() => setIsPdfModalOpen(false)}
+        onImportMemes={handleImportPdfMemes}
+      />
+    </div>
+  );
+}
