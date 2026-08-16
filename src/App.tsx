@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { lazy, Suspense, useState, useEffect } from 'react';
 import { IntroPage } from './components/IntroPage';
 import { GalleryPage } from './components/GalleryPage';
 import { MemeLightbox } from './components/MemeLightbox';
-import { PdfExtractorModal } from './components/PdfExtractorModal';
 import { INITIAL_MEMES } from './data/initialMemes';
 import { Meme, MemeCategory } from './types';
 import { saveItem, getItem } from './utils/storage';
+import { safeMediaUrl, safeVideoUrl, sanitizeMemes } from './utils/media';
+
+const PdfExtractorModal = lazy(() => import('./components/PdfExtractorModal').then((module) => ({ default: module.PdfExtractorModal })));
 
 const STORAGE_KEY = 'concrete_xyz_meme_gallery_v6';
 const VIDEO_STORAGE_KEY = 'concrete_xyz_intro_video';
@@ -18,7 +20,7 @@ export default function App() {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
-        const parsed: Meme[] = JSON.parse(saved);
+        const parsed = sanitizeMemes<Meme>(JSON.parse(saved));
         const existingIds = new Set(parsed.map((m) => m.id));
         const missing = INITIAL_MEMES.filter((m) => !existingIds.has(m.id));
         if (missing.length > 0) {
@@ -35,14 +37,11 @@ export default function App() {
   // Async load from IndexedDB on initial mount if available
   useEffect(() => {
     getItem<Meme[]>(STORAGE_KEY).then((saved) => {
-      if (saved && Array.isArray(saved) && saved.length > 0) {
-        const existingIds = new Set(saved.map((m) => m.id));
+      const validSaved = sanitizeMemes<Meme>(saved);
+      if (validSaved.length > 0) {
+        const existingIds = new Set(validSaved.map((m) => m.id));
         const missing = INITIAL_MEMES.filter((m) => !existingIds.has(m.id));
-        if (missing.length > 0) {
-          setMemes([...missing, ...saved]);
-        } else {
-          setMemes(saved);
-        }
+        setMemes(missing.length > 0 ? [...missing, ...validSaved] : validSaved);
       }
     });
   }, []);
@@ -50,7 +49,7 @@ export default function App() {
   // Intro Video URL state
   const [videoUrl, setVideoUrl] = useState<string>(() => {
     try {
-      return localStorage.getItem(VIDEO_STORAGE_KEY) || 'https://files.catbox.moe/fmrpp0.mp4';
+      return safeVideoUrl(localStorage.getItem(VIDEO_STORAGE_KEY), 'https://files.catbox.moe/fmrpp0.mp4');
     } catch {
       return 'https://files.catbox.moe/fmrpp0.mp4';
     }
@@ -59,7 +58,7 @@ export default function App() {
   useEffect(() => {
     getItem<string>(VIDEO_STORAGE_KEY).then((saved) => {
       if (saved) {
-        setVideoUrl(saved);
+        setVideoUrl(safeVideoUrl(saved, 'https://files.catbox.moe/fmrpp0.mp4'));
       }
     });
   }, []);
@@ -75,8 +74,9 @@ export default function App() {
 
   // Persist video URL
   const handleUploadVideo = (url: string) => {
-    setVideoUrl(url);
-    saveItem(VIDEO_STORAGE_KEY, url);
+    const safeUrl = safeVideoUrl(url, 'https://files.catbox.moe/fmrpp0.mp4');
+    setVideoUrl(safeUrl);
+    saveItem(VIDEO_STORAGE_KEY, safeUrl);
   };
 
   // Actions
@@ -105,7 +105,8 @@ export default function App() {
   };
 
   const handleImportPdfMemes = (newMemes: Meme[]) => {
-    setMemes((prev) => [...newMemes, ...prev]);
+    const validMemes = sanitizeMemes<Meme>(newMemes);
+    setMemes((prev) => sanitizeMemes<Meme>([...validMemes, ...prev]));
   };
 
   const handleAddMeme = (memeData: Partial<Meme>) => {
@@ -113,7 +114,7 @@ export default function App() {
       id: `meme-${Date.now()}`,
       number: memeData.number || `${memes.length + 1}`,
       title: memeData.title || 'Untitled Concrete Meme',
-      imageUrl: memeData.imageUrl || '',
+      imageUrl: safeMediaUrl(memeData.imageUrl),
       category: memeData.category || 'premium',
       tags: memeData.tags || ['Concrete'],
       topText: memeData.topText || '',
@@ -154,11 +155,13 @@ export default function App() {
       />
 
       {/* PDF Extraction Modal */}
-      <PdfExtractorModal
-        isOpen={isPdfModalOpen}
-        onClose={() => setIsPdfModalOpen(false)}
-        onImportMemes={handleImportPdfMemes}
-      />
+      <Suspense fallback={null}>
+        <PdfExtractorModal
+          isOpen={isPdfModalOpen}
+          onClose={() => setIsPdfModalOpen(false)}
+          onImportMemes={handleImportPdfMemes}
+        />
+      </Suspense>
     </div>
   );
 }
