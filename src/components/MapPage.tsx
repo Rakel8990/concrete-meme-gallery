@@ -40,6 +40,7 @@ export const MapPage: React.FC<MapPageProps> = ({ memes, onBackToMaterial, onSel
         <span className="map-progress">{Math.min(unlockedStep, 5)} / 5 UNLOCKED</span>
       </header>
       <main className="map-stage" aria-label="Kian Archive route map">
+        <div className="map-energy map-energy--north" aria-hidden="true" /><div className="map-energy map-energy--east" aria-hidden="true" /><div className="map-energy map-energy--south" aria-hidden="true" /><div className="map-energy map-energy--west" aria-hidden="true" />
         <svg className="map-roads" viewBox="0 0 1000 650" preserveAspectRatio="none" aria-hidden="true">
           <path d="M500 325 C500 215 500 160 500 78" /><path d="M500 325 C635 325 735 325 875 325" /><path d="M500 325 C500 445 500 500 500 580" /><path d="M500 325 C365 325 265 325 125 325" />
           <circle cx="500" cy="325" r="5" />
@@ -49,9 +50,7 @@ export const MapPage: React.FC<MapPageProps> = ({ memes, onBackToMaterial, onSel
         </button>
         {categoryMeta.map((category) => {
           const unlocked = unlockedStep >= category.step;
-          const preview = grouped[category.id].slice(0, 3);
           return <button key={category.id} className={`map-node ${category.position} map-node--${category.accent} ${!unlocked ? 'map-node--locked' : ''}`} onClick={() => unlocked && onSelectCategory(category.id)} disabled={!unlocked} aria-label={`${unlocked ? 'Open' : 'Locked'} ${category.label} memes`}>
-            <span className="map-node__images">{preview.length ? preview.map((meme) => <img key={meme.id} src={meme.imageUrl} alt="" />) : <span>NO MEMES</span>}</span>
             <span className="map-node__copy"><small>{category.eyebrow}</small><strong>{category.label}</strong><em>{unlocked ? 'OPEN' : 'LOCKED'}</em></span>{unlocked ? <ArrowUpRight className="map-node__arrow" /> : <Lock className="map-node__arrow" />}
           </button>;
         })}

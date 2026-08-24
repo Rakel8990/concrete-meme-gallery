@@ -146,7 +146,7 @@ export default function App() {
 
       {/* Lightbox for viewing high-res meme */}
       <MemeLightbox
-        memes={viewerMemes}
+        memes={selectedMeme ? viewerMemes : []}
         index={viewerIndex}
         onClose={() => setSelectedMeme(null)}
         onChange={(index) => { setViewerIndex(index); setSelectedMeme(viewerMemes[index] ?? null); }}
