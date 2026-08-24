@@ -36,7 +36,6 @@ export const MapPage: React.FC<MapPageProps> = ({ memes, onBackToMaterial, onSel
     <div className="map-screen bg-grid-pattern">
       <header className="map-topbar">
         <button onClick={onBackToMaterial} className="map-back"><ArrowLeft /> BACK TO MATERIAL</button>
-        <div className="map-brand"><span className="map-brand__dot" /> KIAN ARCHIVE / ROUTE MAP</div>
         <span className="map-progress">{Math.min(unlockedStep, 5)} / 5 UNLOCKED</span>
       </header>
       <main className="map-stage" aria-label="Kian Archive route map">
@@ -51,7 +50,7 @@ export const MapPage: React.FC<MapPageProps> = ({ memes, onBackToMaterial, onSel
         {categoryMeta.map((category) => {
           const unlocked = unlockedStep >= category.step;
           return <button key={category.id} className={`map-node ${category.position} map-node--${category.accent} ${!unlocked ? 'map-node--locked' : ''}`} onClick={() => unlocked && onSelectCategory(category.id)} disabled={!unlocked} aria-label={`${unlocked ? 'Open' : 'Locked'} ${category.label} memes`}>
-            <span className="map-node__copy"><small>{category.eyebrow}</small><strong>{category.label}</strong><em>{unlocked ? 'OPEN' : 'LOCKED'}</em></span>{unlocked ? <ArrowUpRight className="map-node__arrow" /> : <Lock className="map-node__arrow" />}
+            <span className="map-node__copy"><strong>{category.label}</strong><em>{unlocked ? 'OPEN' : 'LOCKED'}</em></span>{unlocked ? <ArrowUpRight className="map-node__arrow" /> : <Lock className="map-node__arrow" />}
           </button>;
         })}
         <button className={`map-outro ${outroUnlocked ? 'map-outro--open' : ''}`} disabled={!outroUnlocked} onClick={() => setActiveModal('outro')} aria-label={`${outroUnlocked ? 'Open' : 'Locked'} Outro`}><Film /><span><small>FINAL STOP</small><strong>OUTRO</strong></span>{outroUnlocked ? <ArrowUpRight /> : <Lock />}</button>
