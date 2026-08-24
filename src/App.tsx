@@ -65,6 +65,8 @@ export default function App() {
 
   // Lightbox & Modal States
   const [selectedMeme, setSelectedMeme] = useState<Meme | null>(null);
+  const [viewerMemes, setViewerMemes] = useState<Meme[]>([]);
+  const [viewerIndex, setViewerIndex] = useState(0);
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
 
   // Persist memes to storage without quota crash
@@ -138,20 +140,16 @@ export default function App() {
         <GalleryPage
           memes={memes}
           onBackToIntro={() => setActivePage('intro')}
-          onSelectMeme={(m) => setSelectedMeme(m)}
+          onSelectMeme={(m, list, index) => { setSelectedMeme(m); setViewerMemes(list); setViewerIndex(index); }}
         />
       )}
 
       {/* Lightbox for viewing high-res meme */}
       <MemeLightbox
-        meme={selectedMeme}
+        memes={viewerMemes}
+        index={viewerIndex}
         onClose={() => setSelectedMeme(null)}
-        onEdit={(m) => {
-          // Open edit options
-        }}
-        onLike={handleLike}
-        onCategoryChange={handleCategoryChange}
-        onUpdateMemeText={handleUpdateMemeText}
+        onChange={(index) => { setViewerIndex(index); setSelectedMeme(viewerMemes[index] ?? null); }}
       />
 
       {/* PDF Extraction Modal */}
