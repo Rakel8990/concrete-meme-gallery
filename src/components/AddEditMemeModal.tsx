@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Upload, Award, Flame, Trash2, Plus, Check } from 'lucide-react';
 import { Meme, MemeCategory } from '../types';
+import { isSafeMediaUrl } from '../utils/media';
 
 interface AddEditMemeModalProps {
   isOpen: boolean;
@@ -72,6 +73,10 @@ export const AddEditMemeModal: React.FC<AddEditMemeModalProps> = ({
     e.preventDefault();
     if (!title.trim() || !imageUrl.trim()) {
       alert('Please provide a title and an image.');
+      return;
+    }
+    if (!isSafeMediaUrl(imageUrl.trim())) {
+      alert('Please use a valid image URL or upload an image file.');
       return;
     }
 
