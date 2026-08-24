@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Play, Pause, ArrowDown, Volume2, VolumeX } from 'lucide-react';
+import { Play, Pause, ArrowDown, Volume2, VolumeX, SkipForward, ArrowRight } from 'lucide-react';
 
 interface IntroPageProps {
   onEnterGallery: () => void;
@@ -33,6 +33,13 @@ export const IntroPage: React.FC<IntroPageProps> = ({
   const [isTitleDone, setIsTitleDone] = useState(false);
   const [isSubtitleDone, setIsSubtitleDone] = useState(false);
   const [isTypingComplete, setIsTypingComplete] = useState(false);
+
+  const handleSkip = () => {
+    if (videoRef.current) {
+      videoRef.current.pause();
+    }
+    onEnterGallery();
+  };
 
   // Synthetic click sound for typing effect
   const playKeyClick = () => {
@@ -159,6 +166,18 @@ export const IntroPage: React.FC<IntroPageProps> = ({
 
   return (
     <div className="min-h-screen bg-[#080a0f] text-[#f7f4ec] bg-grid-pattern flex flex-col justify-center selection:bg-[#5b1e95] selection:text-[#f3d99b] relative overflow-x-hidden py-12">
+      {/* Top HUD bar with Quick Skip Video button */}
+      <div className="absolute top-4 right-4 sm:top-6 sm:right-8 z-30">
+        <button
+          onClick={handleSkip}
+          className="group inline-flex items-center gap-2 px-3.5 py-1.5 sm:px-4 sm:py-2 bg-[#080a0f]/80 hover:bg-[#f3d99b] text-[#f3d99b] hover:text-[#080a0f] border border-[#f3d99b]/40 hover:border-[#f3d99b] font-mono-code font-bold text-xs tracking-widest uppercase rounded-sm transition-all duration-200 shadow-[0_0_15px_rgba(243,217,155,0.15)] hover:shadow-[0_0_20px_rgba(243,217,155,0.4)] cursor-pointer"
+          title="Skip video and enter gallery directly"
+        >
+          <span>SKIP VIDEO</span>
+          <SkipForward className="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
+        </button>
+      </div>
+
       {/* Main Hero Container */}
       <main className="w-full max-w-[1400px] mx-auto px-6 lg:px-12 py-6 lg:py-10 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
         {/* Left Column - Hero Text */}
@@ -182,18 +201,28 @@ export const IntroPage: React.FC<IntroPageProps> = ({
             )}
           </div>
 
-          {/* CTA Button - Revealed ONLY after video finishes playing */}
-          {isVideoEnded && (
-            <div className="pt-2 animate-fade-in">
+          {/* CTA Actions */}
+          <div className="pt-2 flex flex-col sm:flex-row items-start sm:items-center gap-3">
+            {isVideoEnded ? (
+              <div className="animate-fade-in">
+                <button
+                  onClick={onEnterGallery}
+                  className="group relative inline-flex items-center gap-4 px-8 py-4 bg-[#f3d99b] text-[#080a0f] font-mono-code font-bold text-sm tracking-widest uppercase transition-all duration-300 hover:bg-[#ffffff] hover:scale-105 active:scale-95 cursor-pointer shadow-[0_0_25px_rgba(243,217,155,0.5)]"
+                >
+                  <span>ENTER GALLERY</span>
+                  <ArrowDown className="w-5 h-5 transition-transform duration-300 group-hover:translate-y-1" />
+                </button>
+              </div>
+            ) : (
               <button
-                onClick={onEnterGallery}
-                className="group relative inline-flex items-center gap-4 px-8 py-4 bg-[#f3d99b] text-[#080a0f] font-mono-code font-bold text-sm tracking-widest uppercase transition-all duration-300 hover:bg-[#ffffff] hover:scale-105 active:scale-95 cursor-pointer shadow-[0_0_25px_rgba(243,217,155,0.5)]"
+                onClick={handleSkip}
+                className="group inline-flex items-center gap-2.5 px-5 py-2.5 bg-[#5b1e95]/40 hover:bg-[#5b1e95] text-[#f7f4ec] hover:text-[#f3d99b] border border-[#6a23b3] hover:border-[#f3d99b] font-mono-code font-semibold text-xs tracking-wider uppercase transition-all duration-200 cursor-pointer rounded-sm"
               >
-                <span>ENTER GALLERY</span>
-                <ArrowDown className="w-5 h-5 transition-transform duration-300 group-hover:translate-y-1" />
+                <span>Skip to Gallery</span>
+                <ArrowRight className="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-1" />
               </button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
         {/* Right Column - Video Player Frame & Controls */}
@@ -273,6 +302,16 @@ export const IntroPage: React.FC<IntroPageProps> = ({
                   <Volume2 className="w-3 h-3" />
                 )}
               </button>
+
+              {/* Skip video button in controls bar */}
+              <button
+                onClick={handleSkip}
+                className="px-2.5 py-1 rounded-full bg-[#1b1e2b] hover:bg-[#f3d99b] text-[#f3d99b] hover:text-[#080a0f] border border-[#f3d99b]/30 hover:border-[#f3d99b] text-[10px] font-mono-code font-bold tracking-wider uppercase transition-all cursor-pointer flex items-center gap-1 shadow"
+                title="Skip video & enter gallery"
+              >
+                <span>SKIP</span>
+                <SkipForward className="w-2.5 h-2.5" />
+              </button>
             </div>
           )}
         </div>
@@ -280,3 +319,4 @@ export const IntroPage: React.FC<IntroPageProps> = ({
     </div>
   );
 };
+

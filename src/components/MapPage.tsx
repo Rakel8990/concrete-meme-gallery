@@ -39,19 +39,62 @@ export const MapPage: React.FC<MapPageProps> = ({ memes, onBackToMaterial, onSel
         <span className="map-progress">{Math.min(unlockedStep, 5)} / 5 UNLOCKED</span>
       </header>
       <main className="map-stage" aria-label="Kian Archive route map">
-        <div className="map-energy map-energy--north" aria-hidden="true" /><div className="map-energy map-energy--east" aria-hidden="true" /><div className="map-energy map-energy--south" aria-hidden="true" /><div className="map-energy map-energy--west" aria-hidden="true" />
+        {/* Flowing energy lines from Central Source outward */}
         <svg className="map-roads" viewBox="0 0 1000 650" preserveAspectRatio="none" aria-hidden="true">
-          <path d="M500 325 C500 215 500 160 500 78" /><path d="M500 325 C635 325 735 325 875 325" /><path d="M500 325 C500 445 500 500 500 580" /><path d="M500 325 C365 325 265 325 125 325" />
-          <circle cx="500" cy="325" r="5" />
+          {/* Base guide paths */}
+          <path className="map-road-guide" d="M 500 325 L 500 80" />
+          <path className="map-road-guide" d="M 500 325 L 880 325" />
+          <path className="map-road-guide" d="M 500 325 L 500 570" />
+          <path className="map-road-guide" d="M 500 325 L 120 325" />
+
+          {/* Primary continuous flowing beam stream from center source */}
+          <path className="map-flowing-beam map-flowing-beam--north" d="M 500 325 L 500 80" />
+          <path className="map-flowing-beam map-flowing-beam--east" d="M 500 325 L 880 325" />
+          <path className="map-flowing-beam map-flowing-beam--south" d="M 500 325 L 500 570" />
+          <path className="map-flowing-beam map-flowing-beam--west" d="M 500 325 L 120 325" />
+
+          {/* Secondary pulse wave from source */}
+          <path className="map-flowing-wave map-flowing-wave--north" d="M 500 325 L 500 80" />
+          <path className="map-flowing-wave map-flowing-wave--east" d="M 500 325 L 880 325" />
+          <path className="map-flowing-wave map-flowing-wave--south" d="M 500 325 L 500 570" />
+          <path className="map-flowing-wave map-flowing-wave--west" d="M 500 325 L 120 325" />
+
+          <circle cx="500" cy="325" r="5" className="map-source-emitter" />
         </svg>
+
         <button className="map-hub" onClick={archiveOpen} aria-label="Open Kian Archive introduction">
           <span className="map-hub__mark">K</span><strong>KIAN ARCHIVE</strong><small>START HERE</small><span className="map-hub__count">INTRO / 00</span>
         </button>
+
         {categoryMeta.map((category) => {
           const unlocked = unlockedStep >= category.step;
-          return <button key={category.id} className={`map-node ${category.position} map-node--${category.accent} ${!unlocked ? 'map-node--locked' : ''}`} onClick={() => unlocked && onSelectCategory(category.id)} disabled={!unlocked} aria-label={`${unlocked ? 'Open' : 'Locked'} ${category.label} memes`}>
-            <span className="map-node__copy"><strong>{category.label}</strong><em>{unlocked ? 'OPEN' : 'LOCKED'}</em></span>{unlocked ? <ArrowUpRight className="map-node__arrow" /> : <Lock className="map-node__arrow" />}
-          </button>;
+          return (
+            <button
+              key={category.id}
+              className={`map-node ${category.position} map-node--${category.accent} ${!unlocked ? 'map-node--locked' : ''}`}
+              onClick={() => unlocked && onSelectCategory(category.id)}
+              disabled={!unlocked}
+              aria-label={`${unlocked ? 'Open' : 'Locked'} ${category.label} memes`}
+            >
+              {/* Continuous rounding perimeter beam around the box */}
+              <svg className="node-perimeter-beam" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+                <rect
+                  x="1"
+                  y="1"
+                  width="98"
+                  height="98"
+                  rx="1"
+                  pathLength="100"
+                  className="node-perimeter-beam__rect"
+                />
+              </svg>
+              <span className="map-node__copy">
+                <strong>{category.label}</strong>
+                <em>{unlocked ? 'OPEN' : 'LOCKED'}</em>
+              </span>
+              {unlocked ? <ArrowUpRight className="map-node__arrow" /> : <Lock className="map-node__arrow" />}
+            </button>
+          );
         })}
         <button className={`map-outro ${outroUnlocked ? 'map-outro--open' : ''}`} disabled={!outroUnlocked} onClick={() => setActiveModal('outro')} aria-label={`${outroUnlocked ? 'Open' : 'Locked'} Outro`}><Film /><span><small>FINAL STOP</small><strong>OUTRO</strong></span>{outroUnlocked ? <ArrowUpRight /> : <Lock />}</button>
       </main>
