@@ -19,10 +19,12 @@ export const GalleryPage: React.FC<GalleryPageProps> = ({
   // Navigation steps: 'material' -> 'map' -> 'category'
   const [currentPage, setCurrentPage] = useState<'material' | 'map' | 'category'>('material');
   const [selectedCategory, setSelectedCategory] = useState<MemeCategory | 'all'>('all');
+  const [unlockedStep, setUnlockedStep] = useState(0);
 
-  const handleSelectCategoryFromMap = (category: MemeCategory | 'all') => {
+  const handleSelectCategoryFromMap = (category: MemeCategory) => {
     setSelectedCategory(category);
     setCurrentPage('category');
+    setUnlockedStep((step) => Math.max(step, ['premium', 'dedication', 'normal', 'trash'].indexOf(category) + 1));
   };
 
   const categoryOrder: Record<MemeCategory, number> = {
@@ -67,6 +69,8 @@ export const GalleryPage: React.FC<GalleryPageProps> = ({
         memes={memes}
         onBackToMaterial={() => setCurrentPage('material')}
         onSelectCategory={handleSelectCategoryFromMap}
+        unlockedStep={unlockedStep}
+        onUnlockNext={() => setUnlockedStep((step) => Math.min(step + 1, 5))}
       />
     );
   }
