@@ -8,32 +8,94 @@ import { MemeCard } from './MemeCard';
 interface GalleryPageProps {
   memes: Meme[];
   onBackToIntro: () => void;
-  onSelectMeme: (meme: Meme, list: Meme[], index: number) => void;
+  onSelectMeme: (meme: Meme, list: Meme[], index: number, onBackToMap?: () => void) => void;
 }
 
 const categories: { id: MemeCategory; label: string }[] = [
-  { id: 'premium', label: 'Premium' }, { id: 'dedication', label: 'Dedication' },
-  { id: 'normal', label: 'Normal' }, { id: 'trash', label: 'Trash' },
+  { id: 'premium', label: 'Premium' },
+  { id: 'dedication', label: 'Dedication' },
+  { id: 'normal', label: 'Normal' },
+  { id: 'trash', label: 'Trash' },
 ];
 
 export const GalleryPage: React.FC<GalleryPageProps> = ({ memes, onBackToIntro, onSelectMeme }) => {
   const [currentPage, setCurrentPage] = useState<'material' | 'map' | 'category'>('material');
   const [selectedCategory, setSelectedCategory] = useState<MemeCategory | 'all'>('all');
-  const [unlockedStep, setUnlockedStep] = useState(0);
+  // Premium (step 1) is unlocked from the start
+  const [unlockedStep, setUnlockedStep] = useState(1);
   const ordered = useMemo(() => [...memes].sort((a, b) => Number(a.number) - Number(b.number)), [memes]);
   const visible = selectedCategory === 'all' ? ordered : ordered.filter((m) => m.category === selectedCategory);
-  const handleCategory = (category: MemeCategory) => { setSelectedCategory(category); setCurrentPage('category'); setUnlockedStep((s) => Math.max(s, categories.findIndex((c) => c.id === category) + 1)); };
 
-  if (currentPage === 'material') return <MaterialPage onBackToIntro={onBackToIntro} onEnterMap={() => setCurrentPage('map')} onSkipToMemes={() => { setSelectedCategory('all'); setCurrentPage('category'); }} />;
-  if (currentPage === 'map') return <MapPage memes={memes} onBackToMaterial={() => setCurrentPage('material')} onSelectCategory={handleCategory} unlockedStep={unlockedStep} onUnlockNext={() => setUnlockedStep((s) => Math.min(s + 1, 5))} />;
+  // When a user opens a category, immediately unlock the NEXT category in sequence:
+  // Premium (idx 0) -> unlocks Dedication (step 2)
+  // Dedication (idx 1) -> unlocks Normal (step 3)
+  // Normal (idx 2) -> unlocks Trash (step 4)
+  // Trash (idx 3) -> unlocks Outro (step 5)
+  const handleCategory = (category: MemeCategory) => {
+    setSelectedCategory(category);
+    setCurrentPage('category');
+    const catIndex = categories.findIndex((c) => c.id === category);
+    if (catIndex !== -1) {
+      setUnlockedStep((prev) => Math.max(prev, catIndex + 2));
+    }
+  };
+
+  if (currentPage === 'material') {
+    return (
+      <MaterialPage
+        onBackToIntro={onBackToIntro}
+        onEnterMap={() => setCurrentPage('map')}
+        onSkipToMemes={() => {
+          setSelectedCategory('all');
+          setCurrentPage('category');
+        }}
+      />
+    );
+  }
+
+  if (currentPage === 'map') {
+    return (
+      <MapPage
+        memes={memes}
+        onBackToMaterial={() => setCurrentPage('material')}
+        onSelectCategory={handleCategory}
+        unlockedStep={unlockedStep}
+        onUnlockNext={() => setUnlockedStep((s) => Math.min(s + 1, 5))}
+      />
+    );
+  }
 
   return (
     <div className="gallery-page">
       <nav className="gallery-index__nav gallery-toolbar">
-        <div className="gallery-toolbar__links"><button className="gallery-link" onClick={() => setCurrentPage('map')}><Map aria-hidden="true" /> BACK TO MAP</button><button className="gallery-link gallery-link--muted" onClick={() => setCurrentPage('material')}><ArrowLeft aria-hidden="true" /> MATERIAL</button></div>
-        <div className="gallery-filters" role="tablist" aria-label="Meme categories"><button className={selectedCategory === 'all' ? 'is-active' : ''} onClick={() => setSelectedCategory('all')}>ALL</button>{categories.map((c) => <button key={c.id} className={selectedCategory === c.id ? 'is-active' : ''} onClick={() => setSelectedCategory(c.id)}>{c.label.toUpperCase()}</button>)}</div>
+        <div className="gallery-toolbar__links">
+          <button className="gallery-link" onClick={() => setCurrentPage('map')}>
+            <ArrowLeft aria-hidden="true" /> BACK TO MAP
+          </button>
+        </div>
       </nav>
-      <main className="gallery-main"><p className="gallery-kicker">KIAN ARCHIVE / MEME INDEX</p><div className="gallery-heading-row"><h1 className="gallery-section-title">{selectedCategory === 'all' ? 'All memes' : `${selectedCategory} memes`}</h1><span className="gallery-count">{visible.length} FILES</span></div><div className="masonry-grid">{visible.map((meme, index) => <MemeCard key={meme.id} meme={meme} onClick={() => onSelectMeme(meme, visible, index)} />)}</div></main>
+      <main className="gallery-main">
+        <div className="gallery-heading-row">
+          <h1 className="gallery-section-title">
+            {selectedCategory === 'all' ? 'All memes' : `${selectedCategory.toUpperCase()} MEMES`}
+          </h1>
+          <span className="gallery-count">{visible.length} FILES</span>
+        </div>
+        <div className="masonry-grid">
+          {visible.map((meme, index) => (
+            <MemeCard
+              key={meme.id}
+              meme={meme}
+              onClick={() => onSelectMeme(meme, visible, index, () => setCurrentPage('map'))}
+            />
+          ))}
+        </div>
+        <div className="gallery-footer-nav">
+          <button className="gallery-footer-btn" onClick={() => setCurrentPage('map')}>
+            <ArrowLeft className="w-4 h-4" /> RETURN TO ROUTE MAP
+          </button>
+        </div>
+      </main>
     </div>
   );
 };

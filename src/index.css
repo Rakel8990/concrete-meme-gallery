@@ -77,93 +77,159 @@
 .map-legend { position: absolute; z-index: 2; right: 4%; top: 8%; display: flex; flex-direction: column; align-items: flex-end; gap: .55rem; color: rgba(247,244,236,.42); font-size: .6rem; letter-spacing: .08em; }
 .legend-line { display: inline-block; width: 2.5rem; margin-right: .45rem; border-top: 1px solid var(--warm-sand); vertical-align: middle; }
 
-/* SVG Map Roads & Flowing Energy Beams */
-.map-roads { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
-.map-road-guide { fill: none; stroke: rgba(243,217,155,.22); stroke-width: 1.2; stroke-dasharray: 4 6; }
-.map-source-emitter { fill: var(--warm-sand); filter: drop-shadow(0 0 8px var(--warm-sand)); }
-
-/* Primary flowing beam traveling from center source outward to boxes */
-.map-flowing-beam {
-  fill: none;
-  stroke: var(--warm-sand);
-  stroke-width: 2.4;
-  stroke-linecap: round;
-  filter: drop-shadow(0 0 6px var(--warm-sand)) drop-shadow(0 0 12px rgba(243,217,155,0.7));
-}
-.map-flowing-beam--north {
-  stroke-dasharray: 60 220;
-  animation: flow-beam-north 2.2s linear infinite;
-}
-.map-flowing-beam--east {
-  stroke: #c084fc;
-  stroke-dasharray: 80 340;
-  filter: drop-shadow(0 0 6px #c084fc) drop-shadow(0 0 12px rgba(192,132,252,0.7));
-  animation: flow-beam-east 2.2s linear infinite;
-}
-.map-flowing-beam--south {
-  stroke: #a855f7;
-  stroke-dasharray: 60 220;
-  filter: drop-shadow(0 0 6px #a855f7) drop-shadow(0 0 12px rgba(168,85,247,0.7));
-  animation: flow-beam-south 2.2s linear infinite;
-}
-.map-flowing-beam--west {
-  stroke: #e879f9;
-  stroke-dasharray: 80 340;
-  filter: drop-shadow(0 0 6px #e879f9) drop-shadow(0 0 12px rgba(232,121,249,0.7));
-  animation: flow-beam-west 2.2s linear infinite;
+/* Precision Map Connectors: Strictly from Hub Outer Edge to Box Outer Edge */
+.map-connectors {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
 }
 
-/* Secondary overlapping pulse wave for richer organic energy stream */
-.map-flowing-wave {
-  fill: none;
-  stroke-width: 1.6;
-  stroke-linecap: round;
-  opacity: 0.85;
+.connector-branch {
+  position: absolute;
+  overflow: hidden;
 }
-.map-flowing-wave--north {
-  stroke: #fff6da;
-  stroke-dasharray: 30 250;
-  filter: drop-shadow(0 0 4px #ffffff);
-  animation: flow-beam-north 2.2s linear infinite;
-  animation-delay: 1.1s;
+
+/* North Connector: from top outer edge of Hub (50% - 4.75rem) to bottom outer edge of North box (7% + 8.5rem) */
+.connector-branch--north {
+  left: 50%;
+  top: calc(7% + 8.5rem);
+  bottom: calc(50% + 4.75rem);
+  width: 2px;
+  transform: translateX(-50%);
+  background: repeating-linear-gradient(to bottom, rgba(243,217,155,0.25) 0 4px, transparent 4px 10px);
 }
-.map-flowing-wave--east {
-  stroke: #e9d5ff;
-  stroke-dasharray: 40 380;
-  filter: drop-shadow(0 0 4px #e9d5ff);
-  animation: flow-beam-east 2.2s linear infinite;
-  animation-delay: 1.1s;
+
+/* South Connector: from bottom outer edge of Hub (50% + 4.75rem) to top outer edge of South box (bottom: 7% + 8.5rem) */
+.connector-branch--south {
+  left: 50%;
+  top: calc(50% + 4.75rem);
+  bottom: calc(7% + 8.5rem);
+  width: 2px;
+  transform: translateX(-50%);
+  background: repeating-linear-gradient(to bottom, rgba(243,217,155,0.25) 0 4px, transparent 4px 10px);
 }
-.map-flowing-wave--south {
-  stroke: #d8b4fe;
-  stroke-dasharray: 30 250;
-  filter: drop-shadow(0 0 4px #d8b4fe);
-  animation: flow-beam-south 2.2s linear infinite;
-  animation-delay: 1.1s;
+
+/* East Connector: from right outer edge of Hub (50% + 4.75rem) to left outer edge of Dedication box (right: 5% + 8.5rem) */
+.connector-branch--east {
+  top: 50%;
+  left: calc(50% + 4.75rem);
+  right: calc(5% + 8.5rem);
+  height: 2px;
+  transform: translateY(-50%);
+  background: repeating-linear-gradient(to right, rgba(192,132,252,0.25) 0 4px, transparent 4px 10px);
 }
-.map-flowing-wave--west {
-  stroke: #f5d0fe;
-  stroke-dasharray: 40 380;
-  filter: drop-shadow(0 0 4px #f5d0fe);
-  animation: flow-beam-west 2.2s linear infinite;
+
+/* West Connector: from left outer edge of Hub (50% - 4.75rem) to right outer edge of Trash box (left: 5% + 8.5rem) */
+.connector-branch--west {
+  top: 50%;
+  right: calc(50% + 4.75rem);
+  left: calc(5% + 8.5rem);
+  height: 2px;
+  transform: translateY(-50%);
+  background: repeating-linear-gradient(to left, rgba(232,121,249,0.25) 0 4px, transparent 4px 10px);
+}
+
+/* Traveling light beam inside each branch */
+.connector-beam {
+  position: absolute;
+}
+.connector-wave {
+  position: absolute;
+  opacity: 0.8;
+}
+
+/* North flow: center (bottom) -> up to box (top) */
+.connector-branch--north .connector-beam {
+  left: 0;
+  width: 100%;
+  height: 45px;
+  background: linear-gradient(to top, transparent, var(--warm-sand), #ffffff);
+  box-shadow: 0 0 10px var(--warm-sand), 0 0 20px rgba(243,217,155,0.8);
+  animation: beam-flow-up 2.2s linear infinite;
+}
+.connector-branch--north .connector-wave {
+  left: 0;
+  width: 100%;
+  height: 25px;
+  background: linear-gradient(to top, transparent, #fff9e6);
+  box-shadow: 0 0 8px #ffffff;
+  animation: beam-flow-up 2.2s linear infinite;
   animation-delay: 1.1s;
 }
 
-@keyframes flow-beam-north {
-  0% { stroke-dashoffset: 280; }
-  100% { stroke-dashoffset: 0; }
+/* South flow: center (top) -> down to box (bottom) */
+.connector-branch--south .connector-beam {
+  left: 0;
+  width: 100%;
+  height: 45px;
+  background: linear-gradient(to bottom, transparent, #a855f7, #f3e8ff);
+  box-shadow: 0 0 10px #a855f7, 0 0 20px rgba(168,85,247,0.8);
+  animation: beam-flow-down 2.2s linear infinite;
 }
-@keyframes flow-beam-east {
-  0% { stroke-dashoffset: 420; }
-  100% { stroke-dashoffset: 0; }
+.connector-branch--south .connector-wave {
+  left: 0;
+  width: 100%;
+  height: 25px;
+  background: linear-gradient(to bottom, transparent, #d8b4fe);
+  box-shadow: 0 0 8px #ffffff;
+  animation: beam-flow-down 2.2s linear infinite;
+  animation-delay: 1.1s;
 }
-@keyframes flow-beam-south {
-  0% { stroke-dashoffset: 280; }
-  100% { stroke-dashoffset: 0; }
+
+/* East flow: center (left) -> right to Dedication box */
+.connector-branch--east .connector-beam {
+  top: 0;
+  height: 100%;
+  width: 55px;
+  background: linear-gradient(to right, transparent, #c084fc, #ffffff);
+  box-shadow: 0 0 10px #c084fc, 0 0 20px rgba(192,132,252,0.8);
+  animation: beam-flow-right 2.2s linear infinite;
 }
-@keyframes flow-beam-west {
-  0% { stroke-dashoffset: 420; }
-  100% { stroke-dashoffset: 0; }
+.connector-branch--east .connector-wave {
+  top: 0;
+  height: 100%;
+  width: 30px;
+  background: linear-gradient(to right, transparent, #e9d5ff);
+  box-shadow: 0 0 8px #ffffff;
+  animation: beam-flow-right 2.2s linear infinite;
+  animation-delay: 1.1s;
+}
+
+/* West flow: center (right) -> left to Trash box */
+.connector-branch--west .connector-beam {
+  top: 0;
+  height: 100%;
+  width: 55px;
+  background: linear-gradient(to left, transparent, #e879f9, #ffffff);
+  box-shadow: 0 0 10px #e879f9, 0 0 20px rgba(232,121,249,0.8);
+  animation: beam-flow-left 2.2s linear infinite;
+}
+.connector-branch--west .connector-wave {
+  top: 0;
+  height: 100%;
+  width: 30px;
+  background: linear-gradient(to left, transparent, #f5d0fe);
+  box-shadow: 0 0 8px #ffffff;
+  animation: beam-flow-left 2.2s linear infinite;
+  animation-delay: 1.1s;
+}
+
+@keyframes beam-flow-up {
+  0% { top: 100%; transform: translateY(0); }
+  100% { top: 0; transform: translateY(-100%); }
+}
+@keyframes beam-flow-down {
+  0% { top: 0; transform: translateY(-100%); }
+  100% { top: 100%; transform: translateY(0); }
+}
+@keyframes beam-flow-right {
+  0% { left: 0; transform: translateX(-100%); }
+  100% { left: 100%; transform: translateX(0); }
+}
+@keyframes beam-flow-left {
+  0% { right: 0; transform: translateX(100%); }
+  100% { right: 100%; transform: translateX(0); }
 }
 
 /* Center Hub (Untouched) */
@@ -313,8 +379,40 @@
   .map-progress { font-size: .52rem; padding: .45rem .65rem; }
 }
 
-.gallery-page { min-height: 100svh; color: var(--cream); background: var(--void-dark); }.gallery-toolbar { position: sticky; top: 0; z-index: 10; display: flex; justify-content: space-between; gap: 1rem; padding: 1.2rem clamp(1rem, 4vw, 4rem); background: rgba(8,10,15,.94); backdrop-filter: blur(14px); }.gallery-toolbar__links, .gallery-filters { display: flex; align-items: center; gap: 1rem; }.gallery-link svg { width: 1rem; }.gallery-link--muted { color: rgba(247,244,236,.5); }.gallery-filters { gap: .35rem; overflow-x: auto; }.gallery-filters button { padding: .55rem .7rem; border: 1px solid rgba(247,244,236,.18); color: rgba(247,244,236,.55); background: transparent; font: 700 .6rem 'JetBrains Mono', monospace; cursor: pointer; }.gallery-filters button:hover, .gallery-filters button.is-active { color: var(--void-dark); background: var(--warm-sand); border-color: var(--warm-sand); }.gallery-main { max-width: 1440px; margin: 0 auto; padding: 3rem clamp(1rem, 4vw, 4rem) 6rem; }.gallery-heading-row { display: flex; align-items: end; justify-content: space-between; gap: 1rem; margin-bottom: 2rem; }.gallery-count { color: rgba(247,244,236,.45); font: 700 .62rem 'JetBrains Mono', monospace; letter-spacing: .1em; }.masonry-grid { columns: 4 220px; column-gap: 1rem; }.masonry-tile { position: relative; display: block; width: 100%; margin: 0 0 1rem; padding: 0; overflow: hidden; break-inside: avoid; border: 1px solid rgba(247,244,236,.14); background: #10121a; text-align: left; cursor: zoom-in; }.masonry-tile img { display: block; width: 100%; height: auto; }.masonry-tile__caption { position: absolute; inset: auto .6rem .6rem; display: flex; justify-content: space-between; opacity: 0; color: var(--cream); font: 700 .6rem 'JetBrains Mono', monospace; text-shadow: 0 1px 8px #080a0f; transition: opacity 180ms ease; }.masonry-tile__caption svg { width: .9rem; }.masonry-tile:hover, .masonry-tile:focus-visible { border-color: var(--warm-sand); outline: none; }.masonry-tile:hover .masonry-tile__caption, .masonry-tile:focus-visible .masonry-tile__caption { opacity: 1; }.meme-viewer { position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center; background: rgba(8,10,15,.98); touch-action: pan-y; }.meme-viewer__stage { display: flex; max-width: calc(100vw - 9rem); max-height: calc(100svh - 5rem); flex-direction: column; align-items: center; gap: .8rem; }.meme-viewer__stage img { display: block; max-width: 100%; max-height: calc(100svh - 5rem); width: auto; height: auto; object-fit: contain; }.meme-viewer__counter { color: var(--warm-sand); font: 700 .65rem 'JetBrains Mono', monospace; letter-spacing: .12em; }.meme-viewer__close, .meme-viewer__arrow { position: fixed; display: grid; place-items: center; border: 1px solid rgba(247,244,236,.22); color: var(--cream); background: rgba(8,10,15,.75); cursor: pointer; }.meme-viewer__close { top: 1.2rem; right: 1.2rem; padding: .6rem; }.meme-viewer__arrow { top: 50%; padding: .8rem; transform: translateY(-50%); }.meme-viewer__arrow--left { left: 1.2rem; }.meme-viewer__arrow--right { right: 1.2rem; }.meme-viewer__close:hover, .meme-viewer__arrow:hover { color: var(--warm-sand); border-color: var(--warm-sand); }.meme-viewer svg { width: 1.25rem; }
-@media (max-width: 700px) { .gallery-toolbar { align-items: flex-start; flex-direction: column; }.gallery-toolbar__links { justify-content: space-between; width: 100%; }.masonry-grid { columns: 2 140px; column-gap: .65rem; }.masonry-tile { margin-bottom: .65rem; }.masonry-tile__caption { opacity: 1; inset: auto .4rem .4rem; }.meme-viewer__stage { max-width: calc(100vw - 2rem); max-height: calc(100svh - 7rem); }.meme-viewer__stage img { max-height: calc(100svh - 7rem); }.meme-viewer__arrow { padding: .5rem; opacity: .75; }.meme-viewer__arrow--left { left: .5rem; }.meme-viewer__arrow--right { right: .5rem; } }
+.gallery-page { min-height: 100svh; color: var(--cream); background: var(--void-dark); }.gallery-toolbar { position: sticky; top: 0; z-index: 10; display: flex; justify-content: space-between; gap: 1rem; padding: 1.2rem clamp(1rem, 4vw, 4rem); background: rgba(8,10,15,.94); backdrop-filter: blur(14px); }.gallery-toolbar__links, .gallery-filters { display: flex; align-items: center; gap: 1rem; }.gallery-link svg { width: 1rem; }.gallery-link--muted { color: rgba(247,244,236,.5); }.gallery-filters { gap: .35rem; overflow-x: auto; }.gallery-filters button { padding: .55rem .7rem; border: 1px solid rgba(247,244,236,.18); color: rgba(247,244,236,.55); background: transparent; font: 700 .6rem 'JetBrains Mono', monospace; cursor: pointer; }.gallery-filters button:hover, .gallery-filters button.is-active { color: var(--void-dark); background: var(--warm-sand); border-color: var(--warm-sand); }.gallery-main { max-width: 1440px; margin: 0 auto; padding: 3rem clamp(1rem, 4vw, 4rem) 6rem; }.gallery-heading-row { display: flex; align-items: end; justify-content: space-between; gap: 1rem; margin-bottom: 2rem; }.gallery-count { color: rgba(247,244,236,.45); font: 700 .62rem 'JetBrains Mono', monospace; letter-spacing: .1em; }.masonry-grid { columns: 4 220px; column-gap: 1rem; }.masonry-tile { position: relative; display: block; width: 100%; margin: 0 0 1rem; padding: 0; overflow: hidden; break-inside: avoid; border: 1px solid rgba(247,244,236,.14); background: #10121a; text-align: left; cursor: zoom-in; }.masonry-tile img { display: block; width: 100%; height: auto; }.masonry-tile__caption { position: absolute; inset: auto .6rem .6rem; display: flex; justify-content: space-between; opacity: 0; color: var(--cream); font: 700 .6rem 'JetBrains Mono', monospace; text-shadow: 0 1px 8px #080a0f; transition: opacity 180ms ease; }.masonry-tile__caption svg { width: .9rem; }.masonry-tile:hover, .masonry-tile:focus-visible { border-color: var(--warm-sand); outline: none; }.masonry-tile:hover .masonry-tile__caption, .masonry-tile:focus-visible .masonry-tile__caption { opacity: 1; }.meme-viewer { position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center; background: rgba(8,10,15,.98); touch-action: pan-y; }
+.meme-viewer__stage { display: flex; max-width: calc(100vw - 9rem); max-height: calc(100svh - 5rem); flex-direction: column; align-items: center; gap: .8rem; }
+.meme-viewer__stage img { display: block; max-width: 100%; max-height: calc(100svh - 6.5rem); width: auto; height: auto; object-fit: contain; }
+.meme-viewer__bottom-info { display: flex; align-items: center; justify-content: center; gap: 1.2rem; }
+.meme-viewer__counter { color: var(--warm-sand); font: 700 .65rem 'JetBrains Mono', monospace; letter-spacing: .12em; }
+.meme-viewer__stage-map-btn { display: inline-flex; align-items: center; gap: .45rem; padding: .45rem .85rem; border: 1px solid var(--warm-sand); color: var(--void-dark); background: var(--warm-sand); font: 700 .6rem 'JetBrains Mono', monospace; letter-spacing: .08em; cursor: pointer; transition: all 180ms ease; box-shadow: 0 0 16px rgba(243,217,155,.35); }
+.meme-viewer__stage-map-btn:hover { background: var(--cream); color: var(--void-dark); transform: scale(1.03); }
+.meme-viewer__close, .meme-viewer__arrow { position: fixed; display: grid; place-items: center; border: 1px solid rgba(247,244,236,.22); color: var(--cream); background: rgba(8,10,15,.75); cursor: pointer; }
+.meme-viewer__close { top: 1.2rem; right: 1.2rem; padding: .6rem; }
+.meme-viewer__arrow { top: 50%; padding: .8rem; transform: translateY(-50%); }
+.meme-viewer__arrow--left { left: 1.2rem; }
+.meme-viewer__arrow--right { right: 1.2rem; }
+.meme-viewer__map-nav-btn { position: fixed; right: 1.2rem; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .3rem; padding: .65rem .75rem; border: 1px solid var(--warm-sand); color: var(--warm-sand); background: rgba(8,10,15,.9); font: 700 .55rem 'JetBrains Mono', monospace; letter-spacing: .1em; cursor: pointer; transition: all 200ms ease; box-shadow: 0 0 20px rgba(243,217,155,.25); }
+.meme-viewer__map-nav-btn:hover { background: var(--warm-sand); color: var(--void-dark); transform: translateY(-50%) scale(1.06); }
+.meme-viewer__close:hover, .meme-viewer__arrow:hover { color: var(--warm-sand); border-color: var(--warm-sand); }
+.meme-viewer svg { width: 1.25rem; }
+
+.gallery-footer-nav { margin-top: 3.5rem; display: flex; justify-content: center; }
+.gallery-footer-btn { display: inline-flex; align-items: center; gap: .6rem; padding: .85rem 1.4rem; border: 1px solid rgba(247,244,236,.25); color: var(--cream); background: #11131b; font: 700 .68rem 'JetBrains Mono', monospace; letter-spacing: .1em; cursor: pointer; transition: all 200ms ease; }
+.gallery-footer-btn:hover { border-color: var(--warm-sand); color: var(--warm-sand); background: #181b26; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.4); }
+
+@media (max-width: 700px) {
+  .gallery-toolbar { align-items: flex-start; flex-direction: column; }
+  .gallery-toolbar__links { justify-content: space-between; width: 100%; }
+  .masonry-grid { columns: 2 140px; column-gap: .65rem; }
+  .masonry-tile { margin-bottom: .65rem; }
+  .masonry-tile__caption { opacity: 1; inset: auto .4rem .4rem; }
+  .meme-viewer__stage { max-width: calc(100vw - 2rem); max-height: calc(100svh - 7rem); }
+  .meme-viewer__stage img { max-height: calc(100svh - 7.5rem); }
+  .meme-viewer__arrow { padding: .5rem; opacity: .75; }
+  .meme-viewer__arrow--left { left: .5rem; }
+  .meme-viewer__arrow--right { right: .5rem; }
+  .meme-viewer__map-nav-btn { right: .5rem; padding: .5rem .55rem; }
+}
 
 /* Custom scrollbar for dark aesthetic */
 ::-webkit-scrollbar {

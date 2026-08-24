@@ -39,28 +39,26 @@ export const MapPage: React.FC<MapPageProps> = ({ memes, onBackToMaterial, onSel
         <span className="map-progress">{Math.min(unlockedStep, 5)} / 5 UNLOCKED</span>
       </header>
       <main className="map-stage" aria-label="Kian Archive route map">
-        {/* Flowing energy lines from Central Source outward */}
-        <svg className="map-roads" viewBox="0 0 1000 650" preserveAspectRatio="none" aria-hidden="true">
-          {/* Base guide paths */}
-          <path className="map-road-guide" d="M 500 325 L 500 80" />
-          <path className="map-road-guide" d="M 500 325 L 880 325" />
-          <path className="map-road-guide" d="M 500 325 L 500 570" />
-          <path className="map-road-guide" d="M 500 325 L 120 325" />
-
-          {/* Primary continuous flowing beam stream from center source */}
-          <path className="map-flowing-beam map-flowing-beam--north" d="M 500 325 L 500 80" />
-          <path className="map-flowing-beam map-flowing-beam--east" d="M 500 325 L 880 325" />
-          <path className="map-flowing-beam map-flowing-beam--south" d="M 500 325 L 500 570" />
-          <path className="map-flowing-beam map-flowing-beam--west" d="M 500 325 L 120 325" />
-
-          {/* Secondary pulse wave from source */}
-          <path className="map-flowing-wave map-flowing-wave--north" d="M 500 325 L 500 80" />
-          <path className="map-flowing-wave map-flowing-wave--east" d="M 500 325 L 880 325" />
-          <path className="map-flowing-wave map-flowing-wave--south" d="M 500 325 L 500 570" />
-          <path className="map-flowing-wave map-flowing-wave--west" d="M 500 325 L 120 325" />
-
-          <circle cx="500" cy="325" r="5" className="map-source-emitter" />
-        </svg>
+        {/* Flowing energy lines from Central Source outward to outer box edges */}
+        <div className="map-connectors" aria-hidden="true">
+          <div className="connector-branch connector-branch--north">
+            <div className="connector-beam" />
+            <div className="connector-wave" />
+          </div>
+          <div className="connector-branch connector-branch--east">
+            <div className="connector-beam" />
+            <div className="connector-wave" />
+          </div>
+          <div className="connector-branch connector-branch--south">
+            <div className="connector-beam" />
+            <div className="connector-wave" />
+          </div>
+          <div className="connector-branch connector-branch--west">
+            <div className="connector-beam" />
+            <div className="connector-wave" />
+          </div>
+          <div className="map-source-dot" />
+        </div>
 
         <button className="map-hub" onClick={archiveOpen} aria-label="Open Kian Archive introduction">
           <span className="map-hub__mark">K</span><strong>KIAN ARCHIVE</strong><small>START HERE</small><span className="map-hub__count">INTRO / 00</span>

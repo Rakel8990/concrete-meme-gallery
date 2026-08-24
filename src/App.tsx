@@ -67,6 +67,7 @@ export default function App() {
   const [selectedMeme, setSelectedMeme] = useState<Meme | null>(null);
   const [viewerMemes, setViewerMemes] = useState<Meme[]>([]);
   const [viewerIndex, setViewerIndex] = useState(0);
+  const [lightboxBackToMap, setLightboxBackToMap] = useState<(() => void) | null>(null);
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
 
   // Persist memes to storage without quota crash
@@ -140,7 +141,12 @@ export default function App() {
         <GalleryPage
           memes={memes}
           onBackToIntro={() => setActivePage('intro')}
-          onSelectMeme={(m, list, index) => { setSelectedMeme(m); setViewerMemes(list); setViewerIndex(index); }}
+          onSelectMeme={(m, list, index, backToMap) => {
+            setSelectedMeme(m);
+            setViewerMemes(list);
+            setViewerIndex(index);
+            setLightboxBackToMap(() => backToMap);
+          }}
         />
       )}
 
@@ -148,8 +154,19 @@ export default function App() {
       <MemeLightbox
         memes={selectedMeme ? viewerMemes : []}
         index={viewerIndex}
-        onClose={() => setSelectedMeme(null)}
-        onChange={(index) => { setViewerIndex(index); setSelectedMeme(viewerMemes[index] ?? null); }}
+        onClose={() => {
+          setSelectedMeme(null);
+          setLightboxBackToMap(null);
+        }}
+        onChange={(index) => {
+          setViewerIndex(index);
+          setSelectedMeme(viewerMemes[index] ?? null);
+        }}
+        onBackToMap={lightboxBackToMap ? () => {
+          setSelectedMeme(null);
+          lightboxBackToMap();
+          setLightboxBackToMap(null);
+        } : undefined}
       />
 
       {/* PDF Extraction Modal */}
