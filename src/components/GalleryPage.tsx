@@ -1,9 +1,11 @@
 import React, { useMemo, useState } from 'react';
-import { ArrowLeft, Map } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { Meme, MemeCategory } from '../types';
 import { MaterialPage } from './MaterialPage';
 import { MapPage } from './MapPage';
 import { MemeCard } from './MemeCard';
+import { TrashPage } from './TrashPage';
+import { OutroPage } from './OutroPage';
 
 interface GalleryPageProps {
   memes: Meme[];
@@ -19,7 +21,7 @@ const categories: { id: MemeCategory; label: string }[] = [
 ];
 
 export const GalleryPage: React.FC<GalleryPageProps> = ({ memes, onBackToIntro, onSelectMeme }) => {
-  const [currentPage, setCurrentPage] = useState<'material' | 'map' | 'category'>('material');
+  const [currentPage, setCurrentPage] = useState<'material' | 'map' | 'category' | 'outro'>('material');
   const [selectedCategory, setSelectedCategory] = useState<MemeCategory | 'all'>('all');
   // Premium (step 1) is unlocked from the start
   const [unlockedStep, setUnlockedStep] = useState(1);
@@ -45,10 +47,7 @@ export const GalleryPage: React.FC<GalleryPageProps> = ({ memes, onBackToIntro, 
       <MaterialPage
         onBackToIntro={onBackToIntro}
         onEnterMap={() => setCurrentPage('map')}
-        onSkipToMemes={() => {
-          setSelectedCategory('all');
-          setCurrentPage('category');
-        }}
+        onSkipToMemes={() => setCurrentPage('map')}
       />
     );
   }
@@ -59,10 +58,28 @@ export const GalleryPage: React.FC<GalleryPageProps> = ({ memes, onBackToIntro, 
         memes={memes}
         onBackToMaterial={() => setCurrentPage('material')}
         onSelectCategory={handleCategory}
+        onOpenOutro={() => {
+          setUnlockedStep(5);
+          setCurrentPage('outro');
+        }}
         unlockedStep={unlockedStep}
         onUnlockNext={() => setUnlockedStep((s) => Math.min(s + 1, 5))}
       />
     );
+  }
+
+  if (currentPage === 'outro') {
+    return (
+      <OutroPage
+        onBackToMap={() => setCurrentPage('map')}
+        onRestartIntro={onBackToIntro}
+      />
+    );
+  }
+
+  // Single page full-screen experience for Trash (no headers, no footers, no scroll)
+  if (selectedCategory === 'trash') {
+    return <TrashPage onBackToMap={() => setCurrentPage('map')} />;
   }
 
   return (
@@ -90,6 +107,7 @@ export const GalleryPage: React.FC<GalleryPageProps> = ({ memes, onBackToIntro, 
             />
           ))}
         </div>
+
         <div className="gallery-footer-nav">
           <button className="gallery-footer-btn" onClick={() => setCurrentPage('map')}>
             <ArrowLeft className="w-4 h-4" /> RETURN TO ROUTE MAP
@@ -99,3 +117,4 @@ export const GalleryPage: React.FC<GalleryPageProps> = ({ memes, onBackToIntro, 
     </div>
   );
 };
+
