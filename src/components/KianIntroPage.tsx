@@ -27,16 +27,18 @@ export const KianIntroPage: React.FC<KianIntroPageProps> = ({ onContinue, onBack
 
   // 1: line1
   // 2: line2
-  // 3: line3
+  // 3: line3 ("Why this gallery?")
   // 4: box mount
   // 5: boxP1
   // 6: boxP2
   // 7: boxP3
   // 8: boxP4
-  // 9: delay before enter button
   // 10: enter button
   const [currentStep, setCurrentStep] = useState<number>(1);
+  const [isFlippedToVertical, setIsFlippedToVertical] = useState<boolean>(false);
   const audioCtxRef = useRef<AudioContext | null>(null);
+  const pauseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const flipAnimationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const playKeySound = () => {
     try {
@@ -104,13 +106,25 @@ export const KianIntroPage: React.FC<KianIntroPageProps> = ({ onContinue, onBack
         playKeySound();
       } else {
         clearInterval(interval);
-        setTimeout(() => setCurrentStep(3), 350);
+        // After this typing effect ends, wait 1.6s (1600ms):
+        pauseTimeoutRef.current = setTimeout(() => {
+          // Then flip it to vertical:
+          setIsFlippedToVertical(true);
+          // Then after the flip animation (1000ms), why this gallery continues:
+          flipAnimationTimeoutRef.current = setTimeout(() => {
+            setCurrentStep(3);
+          }, 1000);
+        }, 1600);
       }
     }, 40);
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      if (pauseTimeoutRef.current) clearTimeout(pauseTimeoutRef.current);
+      if (flipAnimationTimeoutRef.current) clearTimeout(flipAnimationTimeoutRef.current);
+    };
   }, [currentStep]);
 
-  // STEP 3: Line 3 typing
+  // STEP 3: Line 3 typing ("Why this gallery?")
   useEffect(() => {
     if (currentStep !== 3) return;
     let idx = 0;
@@ -121,18 +135,17 @@ export const KianIntroPage: React.FC<KianIntroPageProps> = ({ onContinue, onBack
         playKeySound();
       } else {
         clearInterval(interval);
-        setTimeout(() => setCurrentStep(4), 350);
+        // Flow directly into paragraph 1 seamlessly (no jarring box delay)
+        setTimeout(() => setCurrentStep(5), 250);
       }
     }, 45);
     return () => clearInterval(interval);
   }, [currentStep]);
 
-  // STEP 4: Mounting box
+  // STEP 4: (Deprecated box mount, bypass straight to 5)
   useEffect(() => {
     if (currentStep !== 4) return;
-    setTimeout(() => {
-      setCurrentStep(5);
-    }, 500);
+    setCurrentStep(5);
   }, [currentStep]);
 
   // STEP 5: Inside Box P1
@@ -211,6 +224,8 @@ export const KianIntroPage: React.FC<KianIntroPageProps> = ({ onContinue, onBack
 
   // Click anywhere to fast-forward immediately
   const handleInstantSkip = () => {
+    if (pauseTimeoutRef.current) clearTimeout(pauseTimeoutRef.current);
+    if (flipAnimationTimeoutRef.current) clearTimeout(flipAnimationTimeoutRef.current);
     setText1(line1);
     setText2(line2);
     setText3(line3);
@@ -218,6 +233,7 @@ export const KianIntroPage: React.FC<KianIntroPageProps> = ({ onContinue, onBack
     setBoxP2(noteP2);
     setBoxP3(noteP3);
     setBoxP4(noteP4);
+    setIsFlippedToVertical(true);
     setCurrentStep(10);
   };
 
@@ -235,7 +251,7 @@ export const KianIntroPage: React.FC<KianIntroPageProps> = ({ onContinue, onBack
         <>
           <span>{currentStepText}</span>
           {currentStep === stepNum && (
-            <span className="inline-block w-2 h-5 bg-zinc-950 animate-pulse ml-1 align-middle" />
+            <span className="inline-block w-2 h-5 bg-[#c084fc] animate-pulse ml-1 align-middle" />
           )}
         </>
       );
@@ -249,7 +265,7 @@ export const KianIntroPage: React.FC<KianIntroPageProps> = ({ onContinue, onBack
         <>
           <span>{currentStepText}</span>
           {currentStep === stepNum && (
-            <span className="inline-block w-2 h-5 bg-zinc-950 animate-pulse ml-1 align-middle" />
+            <span className="inline-block w-2 h-5 bg-[#c084fc] animate-pulse ml-1 align-middle" />
           )}
         </>
       );
@@ -264,13 +280,13 @@ export const KianIntroPage: React.FC<KianIntroPageProps> = ({ onContinue, onBack
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className="font-black text-[#6a23b3] hover:text-[#4c1582] underline decoration-[#6a23b3]/50 hover:decoration-[#6a23b3] underline-offset-2 transition-colors inline-flex items-baseline cursor-pointer"
+            className="font-bold text-[#c084fc] hover:text-[#f3d99b] underline decoration-[#c084fc]/50 hover:decoration-[#f3d99b] underline-offset-2 transition-colors inline-flex items-baseline cursor-pointer"
             title="Visit @crypttoji on X"
           >
             {linkPart}
           </a>
           {currentStep === stepNum && (
-            <span className="inline-block w-2 h-5 bg-[#6a23b3] animate-pulse ml-1 align-middle" />
+            <span className="inline-block w-2 h-5 bg-[#c084fc] animate-pulse ml-1 align-middle" />
           )}
         </>
       );
@@ -285,14 +301,14 @@ export const KianIntroPage: React.FC<KianIntroPageProps> = ({ onContinue, onBack
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className="font-black text-[#6a23b3] hover:text-[#4c1582] underline decoration-[#6a23b3]/50 hover:decoration-[#6a23b3] underline-offset-2 transition-colors inline-flex items-baseline cursor-pointer"
+            className="font-bold text-[#c084fc] hover:text-[#f3d99b] underline decoration-[#c084fc]/50 hover:decoration-[#f3d99b] underline-offset-2 transition-colors inline-flex items-baseline cursor-pointer"
             title="Visit @crypttoji on X"
           >
             {displayName}
           </a>
           <span>{part2}</span>
           {currentStep === stepNum && (
-            <span className="inline-block w-2 h-5 bg-zinc-950 animate-pulse ml-1 align-middle" />
+            <span className="inline-block w-2 h-5 bg-[#c084fc] animate-pulse ml-1 align-middle" />
           )}
         </>
       );
@@ -336,15 +352,15 @@ export const KianIntroPage: React.FC<KianIntroPageProps> = ({ onContinue, onBack
         </button>
       </div>
 
-      {/* Main Dual Stage Container */}
-      <main className="w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-center z-10">
+      {/* Main Dual Stage Container: Always flex layout with justify-center, perfectly centered */}
+      <main className="w-full max-w-7xl mx-auto z-10 flex flex-col lg:flex-row items-center justify-center min-h-[70vh] gap-6 lg:gap-14 transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)]">
         
-        {/* Left Column (5 cols): Identity */}
-        <div className="lg:col-span-5 flex flex-col justify-center space-y-6">
-          <div className="space-y-4">
+        {/* Identity Rail: Smoothly glides from center to left as right side opens, and rotator flips 3D to vertical */}
+        <div className={`intro-rail ${isFlippedToVertical ? 'intro-rail--flipped' : 'intro-rail--unflipped'}`}>
+          <div className={`intro-identity-rotator ${isFlippedToVertical ? 'intro-identity-rotator--flipped' : 'intro-identity-rotator--unflipped'}`}>
             {/* Step 1: Line 1 */}
             {currentStep >= 1 && (
-              <h1 className="font-heading font-black text-3xl sm:text-4xl md:text-5xl tracking-tight text-[#f7f4ec] leading-tight min-h-[50px] sm:min-h-[60px]">
+              <h1 className="font-heading font-black text-3xl sm:text-4xl md:text-5xl tracking-tight text-[#f7f4ec] leading-tight whitespace-nowrap min-h-[50px] sm:min-h-[60px]">
                 <span>{line1Prefix}</span>
                 <span className="text-[#f3d99b] drop-shadow-[0_0_12px_rgba(243,217,155,0.4)]">{line1Gold}</span>
                 {currentStep === 1 && (
@@ -355,7 +371,7 @@ export const KianIntroPage: React.FC<KianIntroPageProps> = ({ onContinue, onBack
 
             {/* Step 2: Line 2 - Tagline without "shitposter" */}
             {currentStep >= 2 && (
-              <p className="text-xl sm:text-2xl md:text-3xl text-[#c084fc] font-bold tracking-tight leading-relaxed drop-shadow-[0_0_10px_rgba(168,85,247,0.5)] min-h-[42px]">
+              <p className="text-xl sm:text-2xl md:text-3xl text-[#c084fc] font-bold tracking-tight leading-relaxed drop-shadow-[0_0_10px_rgba(168,85,247,0.5)] whitespace-nowrap min-h-[42px]">
                 <span>{text2}</span>
                 {currentStep === 2 && (
                   <span className="inline-block w-2.5 h-6 sm:h-7 bg-[#c084fc] animate-pulse ml-1 align-middle" />
@@ -365,71 +381,70 @@ export const KianIntroPage: React.FC<KianIntroPageProps> = ({ onContinue, onBack
           </div>
         </div>
 
-        {/* Right Column (7 cols): Header + Clean White Box + Enter Button Directly Underneath */}
-        <div className="lg:col-span-7 flex flex-col items-center justify-center space-y-4 w-full">
-          
-          {/* Step 3: Top Text above the box: "Why this gallery?" */}
-          <div className="w-full max-w-xl lg:max-w-2xl min-h-[36px] flex items-center justify-start">
+        {/* Right Section: Header + Flowing Manifesto Text + Enter Button (seamless dark canvas) */}
+        <div
+          className={`flex flex-col items-start justify-center space-y-5 w-full transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+            isFlippedToVertical
+              ? 'max-w-xl lg:max-w-2xl opacity-100 translate-x-0 scale-100 pointer-events-auto'
+              : 'max-w-0 opacity-0 translate-x-12 scale-95 overflow-hidden pointer-events-none'
+          }`}
+        >
+          {/* Step 3: Top Text: "Why this gallery?" */}
+          <div className="w-full min-h-[36px] flex items-center justify-start">
             {currentStep >= 3 && (
-              <p className="font-heading font-black text-xl sm:text-2xl text-[#f3d99b] tracking-tight drop-shadow-[0_0_12px_rgba(243,217,155,0.4)] animate-in fade-in slide-in-from-top-2 duration-300">
+              <h2 className="font-heading font-black text-2xl sm:text-3xl text-[#f3d99b] tracking-tight drop-shadow-[0_0_12px_rgba(243,217,155,0.4)] animate-in fade-in slide-in-from-top-2 duration-300">
                 <span>{text3}</span>
                 {currentStep === 3 && (
-                  <span className="inline-block w-2.5 h-6 bg-[#f3d99b] animate-pulse ml-1.5 align-middle" />
+                  <span className="inline-block w-2.5 h-6 sm:h-7 bg-[#f3d99b] animate-pulse ml-1.5 align-middle" />
                 )}
-              </p>
+              </h2>
             )}
           </div>
 
-          {/* Step 4+: Pure Clean White Box with Purple Bold Lines */}
-          {currentStep >= 4 && (
-            <div className="w-full max-w-xl lg:max-w-2xl bg-white text-[#111827] rounded-sm p-6 sm:p-8 shadow-2xl animate-in fade-in zoom-in-95 duration-500 min-h-[320px] flex flex-col justify-between">
-              
-              <div className="space-y-4">
-                {/* Paragraph 1: Bold Purple Lead */}
-                {currentStep >= 5 && (
-                  <p className="font-heading text-xl sm:text-2xl font-black text-[#6a23b3] tracking-tight leading-snug">
-                    <span>{boxP1}</span>
-                    {currentStep === 5 && (
-                      <span className="inline-block w-2.5 h-6 bg-[#6a23b3] animate-pulse ml-1 align-middle" />
-                    )}
-                  </p>
+          {/* Manifesto Paragraphs: Clean, dark, and seamless directly on dark canvas */}
+          <div className="space-y-4 w-full">
+            {/* Paragraph 1: Bold Lavender Lead */}
+            {currentStep >= 5 && (
+              <p className="font-heading text-xl sm:text-2xl font-bold text-[#c084fc] tracking-tight leading-snug drop-shadow-[0_0_10px_rgba(192,132,252,0.35)] animate-in fade-in duration-300">
+                <span>{boxP1}</span>
+                {currentStep === 5 && (
+                  <span className="inline-block w-2.5 h-6 bg-[#c084fc] animate-pulse ml-1 align-middle" />
                 )}
+              </p>
+            )}
 
-                {/* Paragraph 2: Rich, bold text with clickable @crypttoji link */}
-                {currentStep >= 6 && (
-                  <p className="text-zinc-950 text-base sm:text-[17px] font-semibold leading-relaxed">
-                    {renderBoldTextWithLink(noteP2, boxP2, 6)}
-                  </p>
-                )}
+            {/* Paragraph 2: Soft cream text with glowing @crypttoji link */}
+            {currentStep >= 6 && (
+              <p className="text-[#f7f4ec]/85 text-base sm:text-lg font-medium leading-relaxed animate-in fade-in duration-300">
+                {renderBoldTextWithLink(noteP2, boxP2, 6)}
+              </p>
+            )}
 
-                {/* Paragraph 3: Bold Purple */}
-                {currentStep >= 7 && (
-                  <p className="text-[#6a23b3] font-black text-lg sm:text-xl tracking-tight">
-                    <span>{boxP3}</span>
-                    {currentStep === 7 && (
-                      <span className="inline-block w-2 h-5 bg-[#6a23b3] animate-pulse ml-1 align-middle" />
-                    )}
-                  </p>
+            {/* Paragraph 3: Warm Sand accent */}
+            {currentStep >= 7 && (
+              <p className="text-[#f3d99b] font-bold text-lg sm:text-xl tracking-tight drop-shadow-[0_0_8px_rgba(243,217,155,0.3)] animate-in fade-in duration-300">
+                <span>{boxP3}</span>
+                {currentStep === 7 && (
+                  <span className="inline-block w-2 h-5 bg-[#f3d99b] animate-pulse ml-1 align-middle" />
                 )}
+              </p>
+            )}
 
-                {/* Paragraph 4: Rich, bold & crisp black text with 🗿 badge */}
-                {currentStep >= 8 && (
-                  <div className="pt-3 border-t border-zinc-200">
-                    <p className="text-zinc-950 text-base sm:text-[17px] font-bold leading-relaxed">
-                      <span>{boxP4}</span>
-                      {currentStep === 8 && (
-                        <span className="inline-block w-2.5 h-5 bg-zinc-950 animate-pulse ml-1 align-middle" />
-                      )}
-                    </p>
-                  </div>
-                )}
+            {/* Paragraph 4: Final reflection with 🗿 badge */}
+            {currentStep >= 8 && (
+              <div className="pt-3 border-t border-white/10 animate-in fade-in duration-300">
+                <p className="text-[#f7f4ec]/90 text-base sm:text-lg font-semibold leading-relaxed">
+                  <span>{boxP4}</span>
+                  {currentStep === 8 && (
+                    <span className="inline-block w-2.5 h-5 bg-[#f7f4ec] animate-pulse ml-1 align-middle" />
+                  )}
+                </p>
               </div>
+            )}
+          </div>
 
-            </div>
-          )}
-
-          {/* Step 10: Enter Button placed directly UNDER the box */}
-          <div className="w-full max-w-xl lg:max-w-2xl flex justify-center sm:justify-start pt-3 min-h-[64px]">
+          {/* Step 10: Enter Gallery Button */}
+          <div className="w-full flex justify-center sm:justify-start pt-3 min-h-[64px]">
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -437,7 +452,7 @@ export const KianIntroPage: React.FC<KianIntroPageProps> = ({ onContinue, onBack
                   onContinue();
                 }
               }}
-              className={`w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-3.5 rounded-sm bg-[#f3d99b] hover:bg-white text-[#080a0f] font-mono-code text-xs sm:text-sm font-black tracking-widest uppercase transition-all duration-300 ease-out shadow-[0_0_25px_rgba(243,217,155,0.35)] hover:shadow-[0_0_35px_rgba(243,217,155,0.6)] cursor-pointer group ${
+              className={`w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-3.5 rounded-full border-2 border-[#f3d99b] hover:border-[#fbe2a8] bg-[#f3d99b] hover:bg-white text-[#080a0f] font-mono-code text-xs sm:text-sm font-black tracking-widest uppercase transition-all duration-300 ease-out shadow-[0_0_25px_rgba(243,217,155,0.4)] hover:shadow-[0_0_40px_rgba(243,217,155,0.7)] cursor-pointer group ${
                 currentStep >= 10
                   ? 'opacity-100 pointer-events-auto translate-y-0'
                   : 'opacity-0 pointer-events-none translate-y-1'
