@@ -5,6 +5,8 @@ export interface Meme {
   number: string; // e.g. "1", "2", "8", "dedication"
   title: string;
   imageUrl: string;
+  videoUrl?: string;
+  mediaType?: 'image' | 'video';
   category: MemeCategory;
   tags: string[];
   topText?: string;

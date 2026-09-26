@@ -189,24 +189,24 @@ export const OutroPage: React.FC<OutroPageProps> = ({ onBackToMap, onRestartIntr
 
   return (
     <div
-      className="h-screen w-full bg-[#080a0f] text-[#f7f4ec] relative flex flex-col justify-between selection:bg-[#5b1e95] selection:text-[#f3d99b] overflow-hidden bg-grid-pattern p-4 sm:p-6 lg:p-8 cursor-pointer select-none"
+      className="min-h-[100svh] sm:h-screen w-full bg-[#080a0f] text-[#f7f4ec] relative flex flex-col justify-between selection:bg-[#5b1e95] selection:text-[#f3d99b] overflow-y-auto sm:overflow-hidden bg-grid-pattern p-2.5 sm:p-6 lg:p-8 cursor-pointer select-none"
       onClick={handleInstantComplete}
     >
       {/* Ambient background glows */}
-      <div className="absolute top-1/4 left-1/4 w-[550px] h-[550px] bg-[#5b1e95]/20 rounded-full blur-[140px] pointer-events-none -z-10 animate-pulse" style={{ animationDuration: '6s' }} />
-      <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-[#f3d99b]/15 rounded-full blur-[140px] pointer-events-none -z-10 animate-pulse" style={{ animationDuration: '8s' }} />
+      <div className="absolute top-1/4 left-1/4 w-[320px] sm:w-[550px] h-[320px] sm:h-[550px] bg-[#5b1e95]/20 rounded-full blur-[100px] sm:blur-[140px] pointer-events-none -z-10 animate-pulse" style={{ animationDuration: '6s' }} />
+      <div className="absolute bottom-1/4 right-1/4 w-[280px] sm:w-[500px] h-[280px] sm:h-[500px] bg-[#f3d99b]/15 rounded-full blur-[100px] sm:blur-[140px] pointer-events-none -z-10 animate-pulse" style={{ animationDuration: '8s' }} />
 
       {/* Top Navigation Header */}
-      <header className="w-full max-w-7xl mx-auto flex items-center justify-between z-20 shrink-0">
+      <header className="w-full max-w-7xl mx-auto flex items-center justify-between z-20 shrink-0 gap-2">
         <button
           onClick={(e) => {
             e.stopPropagation();
             onBackToMap();
           }}
-          className="group flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#1b1e2b]/90 border border-white/10 hover:border-[#f3d99b]/50 text-xs font-mono-code text-[#f7f4ec]/80 hover:text-[#f3d99b] transition-all cursor-pointer shadow-lg hover:scale-105"
+          className="group flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-3.5 sm:py-1.5 rounded-full bg-[#1b1e2b]/90 border border-white/10 hover:border-[#f3d99b]/50 text-[10px] sm:text-xs font-mono-code text-[#f7f4ec]/80 hover:text-[#f3d99b] transition-all cursor-pointer shadow-lg hover:scale-105"
           aria-label="Return to Map"
         >
-          <ArrowLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-1" />
+          <ArrowLeft className="w-3 h-3 sm:w-3.5 sm:h-3.5 transition-transform group-hover:-translate-x-1" />
           <span>RETURN TO MAP</span>
         </button>
 
@@ -216,20 +216,20 @@ export const OutroPage: React.FC<OutroPageProps> = ({ onBackToMap, onRestartIntr
               e.stopPropagation();
               onRestartIntro();
             }}
-            className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#1b1e2b]/90 border border-white/10 hover:border-[#f3d99b]/50 text-xs font-mono-code text-[#f7f4ec]/80 hover:text-[#f3d99b] transition-all cursor-pointer shadow-lg hover:scale-105"
+            className="flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-3.5 sm:py-1.5 rounded-full bg-[#1b1e2b]/90 border border-white/10 hover:border-[#f3d99b]/50 text-[10px] sm:text-xs font-mono-code text-[#f7f4ec]/80 hover:text-[#f3d99b] transition-all cursor-pointer shadow-lg hover:scale-105"
             aria-label="Replay Archive Experience"
           >
-            <RotateCcw className="w-3.5 h-3.5" />
+            <RotateCcw className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
             <span>REPLAY ARCHIVE</span>
           </button>
         )}
       </header>
 
       {/* Center Cinematic Outro Monolith Stage */}
-      <main className="w-full max-w-7xl mx-auto flex-1 flex flex-col justify-center items-center z-10 min-h-0 py-3 sm:py-6">
+      <main className="w-full max-w-7xl mx-auto flex-1 flex flex-col justify-center items-center z-10 min-h-0 py-2 sm:py-4 lg:py-6">
         
         {/* Clean Glowing Cybernetic Stage Box */}
-        <div className="relative w-full h-full max-h-[calc(100vh-140px)] rounded-xl bg-[#080a0f]/90 border border-[#6a23b3]/50 p-6 sm:p-10 lg:p-14 shadow-[0_0_50px_rgba(91,30,149,0.3)] backdrop-blur-xl transition-all duration-700 hover:border-[#f3d99b]/60 group flex flex-col justify-between overflow-hidden">
+        <div className="relative w-full min-h-[360px] sm:h-full max-h-[calc(100vh-100px)] sm:max-h-[calc(100vh-140px)] rounded-xl bg-[#080a0f]/90 border border-[#6a23b3]/50 p-4 sm:p-8 lg:p-12 shadow-[0_0_50px_rgba(91,30,149,0.3)] backdrop-blur-xl transition-all duration-700 hover:border-[#f3d99b]/60 group flex flex-col justify-between overflow-hidden">
           
           {/* Outer Breathing Radiant Glow */}
           <div className="absolute -inset-1 rounded-xl bg-gradient-to-r from-[#5b1e95]/40 via-[#f3d99b]/30 to-[#5b1e95]/40 opacity-70 blur-xl group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
@@ -260,40 +260,40 @@ export const OutroPage: React.FC<OutroPageProps> = ({ onBackToMap, onRestartIntr
           </svg>
 
           {/* Corner Cyber Frame Tech Accents */}
-          <div className="absolute top-3 left-3 w-4 h-4 border-t-2 border-l-2 border-[#f3d99b] z-20 pointer-events-none" />
-          <div className="absolute top-3 right-3 w-4 h-4 border-t-2 border-r-2 border-[#f3d99b] z-20 pointer-events-none" />
-          <div className="absolute bottom-3 left-3 w-4 h-4 border-b-2 border-l-2 border-[#f3d99b] z-20 pointer-events-none" />
-          <div className="absolute bottom-3 right-3 w-4 h-4 border-b-2 border-r-2 border-[#f3d99b] z-20 pointer-events-none" />
+          <div className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 w-3 h-3 sm:w-4 sm:h-4 border-t-2 border-l-2 border-[#f3d99b] z-20 pointer-events-none" />
+          <div className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 w-3 h-3 sm:w-4 sm:h-4 border-t-2 border-r-2 border-[#f3d99b] z-20 pointer-events-none" />
+          <div className="absolute bottom-2.5 left-2.5 sm:bottom-3 sm:left-3 w-3 h-3 sm:w-4 sm:h-4 border-b-2 border-l-2 border-[#f3d99b] z-20 pointer-events-none" />
+          <div className="absolute bottom-2.5 right-2.5 sm:bottom-3 sm:right-3 w-3 h-3 sm:w-4 sm:h-4 border-b-2 border-r-2 border-[#f3d99b] z-20 pointer-events-none" />
 
           {/* Message Stack - Perfectly centered and calibrated typography */}
-          <div className="flex-1 flex flex-col items-center justify-center text-center space-y-4 sm:space-y-6 lg:space-y-7 py-3 sm:py-5">
+          <div className="flex-1 flex flex-col items-center justify-center text-center space-y-3 sm:space-y-5 lg:space-y-7 py-2 sm:py-4 px-1">
             
             {/* Step 1: Thanks for making it this far. */}
             {currentStep >= 1 && (
-              <h1 className="font-display-heading font-extrabold text-2xl sm:text-4xl md:text-5xl text-[#f7f4ec] tracking-tight leading-tight min-h-[38px] sm:min-h-[56px]">
+              <h1 className="font-display-heading font-extrabold text-xl sm:text-3xl md:text-4xl lg:text-5xl text-[#f7f4ec] tracking-tight leading-tight min-h-[32px] sm:min-h-[50px]">
                 <span>{text1}</span>
                 {currentStep === 1 && (
-                  <span className="inline-block w-2 h-6 sm:h-9 bg-[#f3d99b] animate-pulse ml-1.5 align-middle" />
+                  <span className="inline-block w-1.5 sm:w-2 h-5 sm:h-8 bg-[#f3d99b] animate-pulse ml-1 align-middle" />
                 )}
               </h1>
             )}
 
             {/* Step 2 & 3: The memes might end here, but the contribution doesn't. */}
-            <div className="space-y-2 sm:space-y-2.5 max-w-2xl min-h-[44px] sm:min-h-[56px]">
+            <div className="space-y-1.5 sm:space-y-2.5 max-w-2xl min-h-[38px] sm:min-h-[50px]">
               {currentStep >= 2 && (
-                <p className="text-sm sm:text-lg md:text-xl text-zinc-300 font-light leading-relaxed">
+                <p className="text-xs sm:text-base md:text-lg text-zinc-300 font-light leading-relaxed">
                   <span>{text2}</span>
                   {currentStep === 2 && (
-                    <span className="inline-block w-1.5 h-4 sm:h-5 bg-zinc-300 animate-pulse ml-1 align-middle" />
+                    <span className="inline-block w-1 h-3.5 sm:h-4 bg-zinc-300 animate-pulse ml-1 align-middle" />
                   )}
                 </p>
               )}
 
               {currentStep >= 3 && (
-                <p className="text-sm sm:text-lg md:text-xl text-[#c084fc] font-bold leading-relaxed drop-shadow-[0_0_12px_rgba(192,132,252,0.6)]">
+                <p className="text-xs sm:text-base md:text-lg text-[#c084fc] font-bold leading-relaxed drop-shadow-[0_0_12px_rgba(192,132,252,0.6)]">
                   <span>{text3}</span>
                   {currentStep === 3 && (
-                    <span className="inline-block w-1.5 h-4 sm:h-5 bg-[#c084fc] animate-pulse ml-1 align-middle" />
+                    <span className="inline-block w-1 h-3.5 sm:h-4 bg-[#c084fc] animate-pulse ml-1 align-middle" />
                   )}
                 </p>
               )}
@@ -301,16 +301,16 @@ export const OutroPage: React.FC<OutroPageProps> = ({ onBackToMap, onRestartIntr
 
             {/* Step 4: See you around Concrete. 🗿 */}
             {currentStep >= 4 && (
-              <div className="pt-2 sm:pt-3 flex items-center justify-center max-w-full">
-                <div className="font-display-heading font-black text-xl sm:text-2xl md:text-3xl lg:text-4xl text-[#f3d99b] tracking-wider uppercase drop-shadow-[0_0_20px_rgba(243,217,155,0.5)] inline-flex items-center justify-center gap-2 sm:gap-3 flex-nowrap">
-                  <span className="whitespace-nowrap">{text4}</span>
+              <div className="pt-2 sm:pt-3 flex items-center justify-center max-w-full px-1">
+                <div className="font-display-heading font-black text-sm xs:text-base sm:text-2xl md:text-3xl lg:text-4xl text-[#f3d99b] tracking-normal sm:tracking-wider uppercase drop-shadow-[0_0_20px_rgba(243,217,155,0.5)] flex items-center justify-center gap-1.5 sm:gap-3 flex-wrap sm:flex-nowrap">
+                  <span>{text4}</span>
                   {currentStep === 4 && (
-                    <span className="inline-block w-2.5 h-6 sm:h-8 bg-[#f3d99b] animate-pulse align-middle" />
+                    <span className="inline-block w-1.5 sm:w-2.5 h-4 sm:h-7 bg-[#f3d99b] animate-pulse align-middle" />
                   )}
                   {/* Interactive Animated 🗿 Concrete Monolith Badge inline */}
                   <button
                     onClick={handleMoaiClick}
-                    className={`inline-flex items-center justify-center text-xl sm:text-2xl md:text-3xl lg:text-4xl p-0.5 transition-all duration-300 cursor-pointer ${
+                    className={`inline-flex items-center justify-center text-base xs:text-lg sm:text-2xl md:text-3xl lg:text-4xl p-0.5 transition-all duration-300 cursor-pointer ${
                       moaiPulsing
                         ? 'scale-130 rotate-12 drop-shadow-[0_0_25px_#f3d99b]'
                         : 'hover:scale-125 hover:rotate-6 drop-shadow-[0_0_10px_rgba(243,217,155,0.4)]'
@@ -328,23 +328,23 @@ export const OutroPage: React.FC<OutroPageProps> = ({ onBackToMap, onRestartIntr
 
           {/* Step 5: Unlocked Action Deck - Only X button */}
           <div
-            className={`w-full pt-4 flex items-center justify-center transition-all duration-700 shrink-0 ${
+            className={`w-full pt-2 sm:pt-4 flex items-center justify-center transition-all duration-700 shrink-0 ${
               currentStep === 5 ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-2 pointer-events-none'
             }`}
           >
             <a
-              href="https://x.com/22kian_"
+              href="https://x.com/22kian_eth"
               target="_blank"
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
-              className="flex items-center gap-2.5 px-7 py-3 rounded-full bg-[#1b1e2b]/95 hover:bg-[#5b1e95] text-[#f7f4ec] hover:text-[#f3d99b] border border-white/20 hover:border-[#f3d99b] font-mono-code font-bold text-xs tracking-wider uppercase transition-all hover:scale-105 cursor-pointer shadow-[0_0_20px_rgba(91,30,149,0.3)] hover:shadow-[0_0_25px_rgba(243,217,155,0.4)]"
+              className="flex items-center gap-2 sm:gap-2.5 px-5 py-2.5 sm:px-7 sm:py-3 rounded-full bg-[#1b1e2b]/95 hover:bg-[#5b1e95] text-[#f7f4ec] hover:text-[#f3d99b] border border-white/20 hover:border-[#f3d99b] font-mono-code font-bold text-[11px] sm:text-xs tracking-wider uppercase transition-all hover:scale-105 cursor-pointer shadow-[0_0_20px_rgba(91,30,149,0.3)] hover:shadow-[0_0_25px_rgba(243,217,155,0.4)]"
             >
               {/* X / Twitter icon */}
-              <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+              <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current" viewBox="0 0 24 24">
                 <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
               </svg>
-              <span>@22KIAN_</span>
-              <ArrowUpRight className="w-4 h-4" />
+              <span>@22KIAN_ETH</span>
+              <ArrowUpRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </a>
           </div>
 

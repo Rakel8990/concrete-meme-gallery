@@ -1,14 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Play, Pause, Volume2, VolumeX, SkipForward, ArrowRight } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, SkipForward, ArrowRight, ArrowLeft } from 'lucide-react';
 
 interface IntroPageProps {
   onEnterGallery: () => void;
+  onBackToFirstIntro?: () => void;
   videoUrl: string | null;
   onUploadVideo: (url: string) => void;
 }
 
 export const IntroPage: React.FC<IntroPageProps> = ({
   onEnterGallery,
+  onBackToFirstIntro,
   videoUrl,
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -182,11 +184,27 @@ export const IntroPage: React.FC<IntroPageProps> = ({
       <div className="absolute top-1/4 left-1/10 w-96 h-96 bg-[#5b1e95]/20 rounded-full blur-[100px] pointer-events-none -z-10" />
       <div className="absolute bottom-1/4 right-1/10 w-96 h-96 bg-[#f3d99b]/10 rounded-full blur-[100px] pointer-events-none -z-10" />
 
-      {/* Top action: skip button - visible immediately on page open */}
-      <div className="absolute top-5 right-5 sm:top-7 sm:right-8 z-20">
+      {/* Top action header: back button on left, skip button on right */}
+      <div className="absolute top-4 left-4 sm:top-6 sm:left-8 right-4 sm:right-8 flex items-center justify-between z-20 pointer-events-none">
+        {onBackToFirstIntro ? (
+          <button
+            onClick={() => {
+              if (videoRef.current) {
+                videoRef.current.pause();
+              }
+              onBackToFirstIntro();
+            }}
+            className="pointer-events-auto group flex items-center gap-1.5 sm:gap-2 px-3.5 py-1.5 rounded-full bg-[#1b1e2b]/90 border border-white/10 hover:border-[#f3d99b]/50 text-xs font-mono-code text-[#f7f4ec]/80 hover:text-[#f3d99b] transition-all cursor-pointer shadow-lg hover:scale-105"
+            aria-label="Return to first intro"
+          >
+            <ArrowLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-1" />
+            <span>BACK</span>
+          </button>
+        ) : <div />}
+
         <button
           onClick={handleSkip}
-          className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#1b1e2b]/90 hover:bg-[#f3d99b] text-[#f3d99b] hover:text-[#080a0f] border border-[#f3d99b]/40 hover:border-[#f3d99b] text-xs font-mono-code font-bold tracking-wider uppercase transition-all shadow-lg cursor-pointer"
+          className="pointer-events-auto flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#1b1e2b]/90 hover:bg-[#f3d99b] text-[#f3d99b] hover:text-[#080a0f] border border-[#f3d99b]/40 hover:border-[#f3d99b] text-xs font-mono-code font-bold tracking-wider uppercase transition-all shadow-lg cursor-pointer hover:scale-105"
           aria-label="Skip to meme gallery"
         >
           <span>SKIP TO GALLERY</span>

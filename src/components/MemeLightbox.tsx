@@ -24,6 +24,7 @@ export const MemeLightbox: React.FC<MemeLightboxProps> = ({
   const hasPrevious = index > 0;
   const hasNext = index < memes.length - 1;
   const isLastImage = index === memes.length - 1 && memes.length > 0;
+  const isVideo = meme?.mediaType === 'video' || !!meme?.videoUrl || meme?.imageUrl?.endsWith('.mp4');
 
   useEffect(() => {
     if (!meme) return;
@@ -98,41 +99,36 @@ export const MemeLightbox: React.FC<MemeLightboxProps> = ({
       )}
 
       <div className="meme-viewer__stage">
-        <img src={meme.imageUrl} alt={meme.title} />
-        <div className="meme-viewer__bottom-info">
+        {isVideo ? (
+          <video
+            key={meme.id}
+            src={meme.videoUrl || meme.imageUrl}
+            controls
+            autoPlay
+            playsInline
+            loop
+            className="max-w-full max-h-[calc(100svh-6.5rem)] w-auto h-auto rounded border border-[#6a23b3]/40 shadow-2xl bg-black"
+          />
+        ) : (
+          <img src={meme.imageUrl} alt={meme.title} />
+        )}
+        <div className="meme-viewer__bottom-info flex items-center justify-center gap-3">
           <span className="meme-viewer__counter">
             {String(index + 1).padStart(2, '0')} / {String(memes.length).padStart(2, '0')}
           </span>
-          {isLastImage && (
-            <button
-              onClick={handleReturnToMap}
-              className="meme-viewer__stage-map-btn"
-              title="Return to route map"
-            >
-              <Map className="w-3.5 h-3.5" />
-              <span>RETURN TO MAP</span>
-            </button>
-          )}
+          <span className="text-zinc-400 font-mono-code text-[11px] font-bold tracking-wider uppercase bg-black/60 px-2 py-0.5 rounded border border-white/10 max-w-[280px] sm:max-w-md truncate">
+            #{meme.number} {meme.title}
+          </span>
         </div>
       </div>
 
-      {hasNext ? (
+      {hasNext && (
         <button
           className="meme-viewer__arrow meme-viewer__arrow--right"
           onClick={next}
           aria-label="Next meme"
         >
           <ChevronRight />
-        </button>
-      ) : (
-        <button
-          className="meme-viewer__map-nav-btn"
-          onClick={handleReturnToMap}
-          aria-label="Return to route map"
-          title="Return to route map"
-        >
-          <Map className="w-4 h-4" />
-          <span>MAP</span>
         </button>
       )}
     </div>
