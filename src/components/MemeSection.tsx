@@ -118,7 +118,7 @@ export const MemeSection: React.FC<MemeSectionProps> = ({
       {isExpanded && (
         <div className="mt-6">
           {memes.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
               {memes.map((meme) => (
                 <MemeCard
                   key={meme.id}

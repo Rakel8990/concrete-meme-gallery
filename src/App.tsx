@@ -1,4 +1,6 @@
 import React, { lazy, Suspense, useState, useEffect } from 'react';
+import { HumanOrMoaiGate } from './components/HumanOrMoaiGate';
+import { KianIntroPage } from './components/KianIntroPage';
 import { IntroPage } from './components/IntroPage';
 import { GalleryPage } from './components/GalleryPage';
 import { MemeLightbox } from './components/MemeLightbox';
@@ -9,24 +11,23 @@ import { safeMediaUrl, safeVideoUrl, sanitizeMemes } from './utils/media';
 
 const PdfExtractorModal = lazy(() => import('./components/PdfExtractorModal').then((module) => ({ default: module.PdfExtractorModal })));
 
-const STORAGE_KEY = 'concrete_xyz_meme_gallery_v6';
+const STORAGE_KEY = 'concrete_xyz_meme_gallery_v15';
 const VIDEO_STORAGE_KEY = 'concrete_xyz_intro_video';
 
 export default function App() {
-  const [activePage, setActivePage] = useState<'intro' | 'gallery'>('intro');
+  const [activePage, setActivePage] = useState<'gate' | 'kian-intro' | 'intro' | 'gallery'>('gate');
   
-  // Memes state with initial PDF concrete.xyz memes & new additions
+  // Memes state with initial concrete.xyz memes & new additions
   const [memes, setMemes] = useState<Meme[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = sanitizeMemes<Meme>(JSON.parse(saved));
-        const existingIds = new Set(parsed.map((m) => m.id));
+        const initialMap = new Map(INITIAL_MEMES.map((m) => [m.id, m]));
+        const merged = parsed.map((m) => (initialMap.has(m.id) ? { ...initialMap.get(m.id)!, likes: Math.max(m.likes, initialMap.get(m.id)!.likes) } : m));
+        const existingIds = new Set(merged.map((m) => m.id));
         const missing = INITIAL_MEMES.filter((m) => !existingIds.has(m.id));
-        if (missing.length > 0) {
-          return [...missing, ...parsed];
-        }
-        return parsed;
+        return [...merged, ...missing];
       }
     } catch (e) {
       console.warn('LocalStorage read skipped:', e);
@@ -39,9 +40,11 @@ export default function App() {
     getItem<Meme[]>(STORAGE_KEY).then((saved) => {
       const validSaved = sanitizeMemes<Meme>(saved);
       if (validSaved.length > 0) {
-        const existingIds = new Set(validSaved.map((m) => m.id));
+        const initialMap = new Map(INITIAL_MEMES.map((m) => [m.id, m]));
+        const merged = validSaved.map((m) => (initialMap.has(m.id) ? { ...initialMap.get(m.id)!, likes: Math.max(m.likes, initialMap.get(m.id)!.likes) } : m));
+        const existingIds = new Set(merged.map((m) => m.id));
         const missing = INITIAL_MEMES.filter((m) => !existingIds.has(m.id));
-        setMemes(missing.length > 0 ? [...missing, ...validSaved] : validSaved);
+        setMemes([...merged, ...missing]);
       }
     });
   }, []);
@@ -65,6 +68,9 @@ export default function App() {
 
   // Lightbox & Modal States
   const [selectedMeme, setSelectedMeme] = useState<Meme | null>(null);
+  const [viewerMemes, setViewerMemes] = useState<Meme[]>([]);
+  const [viewerIndex, setViewerIndex] = useState(0);
+  const [lightboxBackToMap, setLightboxBackToMap] = useState<(() => void) | null>(null);
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
 
   // Persist memes to storage without quota crash
@@ -110,11 +116,18 @@ export default function App() {
   };
 
   const handleAddMeme = (memeData: Partial<Meme>) => {
+    const isVideo =
+      memeData.mediaType === 'video' ||
+      !!memeData.videoUrl ||
+      (typeof memeData.imageUrl === 'string' && memeData.imageUrl.endsWith('.mp4'));
+    const safeImg = safeMediaUrl(memeData.imageUrl);
     const newMeme: Meme = {
       id: `meme-${Date.now()}`,
       number: memeData.number || `${memes.length + 1}`,
       title: memeData.title || 'Untitled Concrete Meme',
-      imageUrl: safeMediaUrl(memeData.imageUrl),
+      imageUrl: safeImg,
+      videoUrl: memeData.videoUrl || (isVideo ? safeImg : undefined),
+      mediaType: isVideo ? 'video' : 'image',
       category: memeData.category || 'premium',
       tags: memeData.tags || ['Concrete'],
       topText: memeData.topText || '',
@@ -128,9 +141,19 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#080a0f] text-[#f7f4ec] font-sans">
-      {activePage === 'intro' ? (
+      {activePage === 'gate' ? (
+        <HumanOrMoaiGate
+          onChooseMoai={() => setActivePage('kian-intro')}
+        />
+      ) : activePage === 'kian-intro' ? (
+        <KianIntroPage
+          onContinue={() => setActivePage('intro')}
+          onBackToGate={() => setActivePage('gate')}
+        />
+      ) : activePage === 'intro' ? (
         <IntroPage
           onEnterGallery={() => setActivePage('gallery')}
+          onBackToFirstIntro={() => setActivePage('kian-intro')}
           videoUrl={videoUrl}
           onUploadVideo={handleUploadVideo}
         />
@@ -138,20 +161,32 @@ export default function App() {
         <GalleryPage
           memes={memes}
           onBackToIntro={() => setActivePage('intro')}
-          onSelectMeme={(m) => setSelectedMeme(m)}
+          onSelectMeme={(m, list, index, backToMap) => {
+            setSelectedMeme(m);
+            setViewerMemes(list);
+            setViewerIndex(index);
+            setLightboxBackToMap(() => backToMap);
+          }}
         />
       )}
 
       {/* Lightbox for viewing high-res meme */}
       <MemeLightbox
-        meme={selectedMeme}
-        onClose={() => setSelectedMeme(null)}
-        onEdit={(m) => {
-          // Open edit options
+        memes={selectedMeme ? viewerMemes : []}
+        index={viewerIndex}
+        onClose={() => {
+          setSelectedMeme(null);
+          setLightboxBackToMap(null);
         }}
-        onLike={handleLike}
-        onCategoryChange={handleCategoryChange}
-        onUpdateMemeText={handleUpdateMemeText}
+        onChange={(index) => {
+          setViewerIndex(index);
+          setSelectedMeme(viewerMemes[index] ?? null);
+        }}
+        onBackToMap={lightboxBackToMap ? () => {
+          setSelectedMeme(null);
+          lightboxBackToMap();
+          setLightboxBackToMap(null);
+        } : undefined}
       />
 
       {/* PDF Extraction Modal */}
